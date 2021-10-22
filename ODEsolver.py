@@ -31,17 +31,18 @@ def odes(x, t, s):
 x_0 = [1, 1]
 
 # declare time vector
-t = np.linspace(0, 10, 100)
+t = np.linspace(0, 6, 100)
 
-# solve system of diff. eq. for 0 < S < 5, R_0=1
+# solve system of diff. eq. for 0 < S < 4, R_0=1
 S_values = range(5)
 for S in S_values:
     x = odeint(odes, x_0, t, args=(S,))
     R = x[:, 0]
     R_P = x[:, 1]
-    plt.plot(t, R)
+    plt.plot(t, R, label=f'$S={S}$')
 
 plt.title('$R(t)$ for different values of $S$')
 plt.xlabel('$t$')
 plt.ylabel('$R(t)$')
+plt.legend()
 plt.show()
