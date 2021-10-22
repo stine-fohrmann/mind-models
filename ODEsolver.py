@@ -28,20 +28,24 @@ def odes(x, t, s):
 
 
 # initial condition
-x_0 = [1, 1]
+# R_0 = 1
+R_P0 = 1
 
 # declare time vector
 t = np.linspace(0, 6, 100)
 
-# solve system of diff. eq. for 0 < S < 4, R_0=1
+# solve system of diff. eq. for 0 < S < 4, R_0=1,2
 S_values = range(5)
+R_0_values = [1, 2]
 for S in S_values:
-    x = odeint(odes, x_0, t, args=(S,))
-    R = x[:, 0]
-    R_P = x[:, 1]
-    plt.plot(t, R, label=f'$S={S}$')
+    for R_0 in R_0_values:
+        x_0 = [R_0, R_P0]
+        x = odeint(odes, x_0, t, args=(S,))
+        R = x[:, 0]
+        R_P = x[:, 1]
+        plt.plot(t, R, label=f'$S={S}$, ${R_0=}$')
 
-plt.title('$R(t)$ for different values of $S$')
+plt.title('$R(t)$ for different values of $S$ and $R_0$')
 plt.xlabel('$t$')
 plt.ylabel('$R(t)$')
 plt.legend()
