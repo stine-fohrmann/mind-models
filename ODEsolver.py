@@ -14,11 +14,11 @@ def odes(x, t):
     K_m2 = 0.05
     a = 1
     S = 2 + 0.1*np.sin(t)
-    S = t
+    S = 1
     # assign each ODE to a vector element
     R = x[0]
     R_P = x[1]
-    R_T = R + R_P
+    R_T = 1
 
     # define each ODE
     # sigmoidal:
@@ -33,6 +33,19 @@ def odes(x, t):
 
     return [dRdt,dR_Pdt]
 
+S = np.linspace(0,3,100)
+
+k_1 = 1
+k_2 = 1
+K_m1 = 0.05
+K_m2 = 0.05
+u = k_1 * S 
+v = k_2
+J = K_m1
+K = K_m2
+
+G = 2*u*K /(v-u+v*J+u*K+ np.sqrt((v-u+v*J+u*K)**2-4*(v-u)*u*K))
+
 
 # initial condition
 x_0 = [0,0]
@@ -40,7 +53,7 @@ x_0 = [0,0]
 # print(odes(x=x_0, t=0))
 
 # declare a time vector
-t = np.linspace(0, 10, 100)
+t = np.linspace(0, 2, 100)
 
 # solve system of diff. eq.
 x = odeint(odes, x_0, t)
@@ -50,7 +63,8 @@ R_P = x[:, 1]
 #S = x[:, 2]
 
 # plot results
-plt.plot(t, R_P)
+#plt.plot(t, R_P)
+plt.plot(S,G)
 plt.xlabel('t')
 plt.ylabel('$R$')
 plt.show()
