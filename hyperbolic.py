@@ -14,7 +14,7 @@ def odes(x, t):
     a = 1
     S = 2 + 0.1*np.sin(t)
     #S = 10
-    #S = 2*t
+    S = t
     # assign each ODE to a vector element
     R = x[0]
     R_P = x[1]
