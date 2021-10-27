@@ -13,7 +13,7 @@ def odes(x, t, s):
     K_m1 = 0.05
     K_m2 = 0.05
     S = s
-    # S = 2 + 0.1*np.sin(t)
+    S = S + 0.5*np.sin(t/10)
 
     # assign each ODE to a vector element
     R_P = x[0]
@@ -26,12 +26,13 @@ def odes(x, t, s):
 
 
 # declare time vector
-t = np.linspace(0, 3, 100)
+t = np.linspace(0, 100, 100)
 
 # solve system of diff. eq. for 0 < S < 4, R_0=1,2
-S_values = range(5)
+# S_values = np.linspace(0, 2, 11)
+S_values = [1]
 # initial condition
-R_P_values = [0, 0.1, 0.5]
+R_P_values = [0.1]
 for S in S_values:
     for R_P0 in R_P_values:
         x_0 = [R_P0]
@@ -39,7 +40,7 @@ for S in S_values:
         R_P = x[:, 0]
         plt.plot(t, R_P, label=f'$S={S}$, ${R_P0=}$')
 
-plt.title('$R_P(t)$ for different values of $S$ and $R_{P0}$')
+plt.title('$R_P(t)$ for oscillating $S$ and $R_{P0}=0.1$')
 plt.xlabel('$t$')
 plt.ylabel('$R_P(t)$')
 plt.legend()
