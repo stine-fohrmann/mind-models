@@ -7,41 +7,50 @@ import matplotlib.pyplot as plt
 # function that returns dy/dt
 def odes(x, t, s):
     # constants
-    k_0 = 0.01
-    k_1 = 1
-    k_2 = 1
-    K_m1 = 0.05
-    K_m2 = 0.05
+    k_0 = 0
+    k_1 = 0.05
+    k_2 = 0.1
+    k_2prime = 0.5
+    k_3 = 1
+    k_4 = 0.2
+    J_3 = 0.05
+    J_4 = 0.05
     S = s
-    S = S + 0.5*np.sin(t/10)
+    # S = S + 2*np.sin(t/10)
 
     # assign each ODE to a vector element
-    R_P = x[0]
-    R_T = 1
+    R = x[0]
 
-    # define each ODE: sigmoidal model (c)
-    dR_Pdt = (k_1 * S * (R_T - R_P)) / (K_m1 + R_T - R_P) - (k_2 * R_P) / (K_m2 + R_P)
+    def E(R):
+        return goldbeter_koshland(k_3, k_4 * R, J_3, J_4)
 
-    return [dR_Pdt]
+    # define each ODE: mutual inhibition model (f)
+    dRdt = k_0 + k_1 * S - k_2 * R - k_2prime * E(R) * R
+
+    return [dRdt]
+
+
+def goldbeter_koshland(u, v, J, K):
+    G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
+    return G
 
 
 # declare time vector
-t = np.linspace(0, 100, 100)
+t = np.linspace(0, 50, 100)
 
-# solve system of diff. eq. for 0 < S < 4, R_0=1,2
-# S_values = np.linspace(0, 2, 11)
-S_values = [1]
+# solve system of diff. eq.
+S_values = np.linspace(0, 10, 11)
 # initial condition
-R_P_values = [0.1]
+R_0_values = [0]
 for S in S_values:
-    for R_P0 in R_P_values:
-        x_0 = [R_P0]
+    for R_0 in R_0_values:
+        x_0 = [R_0]
         x = odeint(odes, x_0, t, args=(S,))
-        R_P = x[:, 0]
-        plt.plot(t, R_P, label=f'$S={S}$, ${R_P0=}$')
+        R = x[:, 0]
+        plt.plot(t, R, label=f'$S={S}$')
 
-plt.title('$R_P(t)$ for oscillating $S$ and $R_{P0}=0.1$')
+plt.title('$R(t)$ for different $S$ and $R_0=0$')
 plt.xlabel('$t$')
-plt.ylabel('$R_P(t)$')
-plt.legend()
+plt.ylabel('$R(t)$')
+plt.legend(loc='lower right')
 plt.show()
