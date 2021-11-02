@@ -11,8 +11,8 @@ def odes(x, t, s):
     k_1 = 0.05
     k_2 = 0.1
     k_2prime = 0.5
-    k_3 = 1
-    k_4 = 0.2
+    k_3 = 0.2
+    k_4 = 1
     J_3 = 0.05
     J_4 = 0.05
     S = s
@@ -36,10 +36,10 @@ def goldbeter_koshland(u, v, J, K):
 
 
 # declare time vector
-t = np.linspace(0, 50, 100)
+t = np.linspace(0, 20, 100)
 
 # solve system of diff. eq.
-S_values = np.linspace(0, 10, 11)
+S_values = np.linspace(1.5, 2, 10)
 # initial condition
 R_0_values = [0]
 for S in S_values:
@@ -47,10 +47,10 @@ for S in S_values:
         x_0 = [R_0]
         x = odeint(odes, x_0, t, args=(S,))
         R = x[:, 0]
-        plt.plot(t, R, label=f'$S={S}$')
+        plt.plot(t, R, label=f'$S={round(S,2)}$')
 
 plt.title('$R(t)$ for different $S$ and $R_0=0$')
 plt.xlabel('$t$')
 plt.ylabel('$R(t)$')
-plt.legend(loc='lower right')
+plt.legend(loc='upper left')
 plt.show()
