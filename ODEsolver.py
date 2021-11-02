@@ -36,21 +36,33 @@ def goldbeter_koshland(u, v, J, K):
 
 
 # declare time vector
-t = np.linspace(0, 20, 100)
+t = np.linspace(0, 100, 100)
+
+Rt_plot = plt.figure(1)
 
 # solve system of diff. eq.
 S_values = np.linspace(1.5, 2, 10)
 # initial condition
 R_0_values = [0]
+
+R_asymptote = []
+
 for S in S_values:
     for R_0 in R_0_values:
         x_0 = [R_0]
         x = odeint(odes, x_0, t, args=(S,))
         R = x[:, 0]
+        R_asymptote.append(R[-1])
         plt.plot(t, R, label=f'$S={round(S,2)}$')
 
 plt.title('$R(t)$ for different $S$ and $R_0=0$')
 plt.xlabel('$t$')
 plt.ylabel('$R(t)$')
-plt.legend(loc='upper left')
+plt.legend(loc='lower right')
+
+RS_plot = plt.figure(2)
+plt.plot(S_values, R_asymptote, '.')
+plt.title('Stable values that $R$ approaches over time, depending on $S$')
+plt.xlabel('$S$')
+plt.ylabel(r'$R$ as $t \rightarrow \infty$')
 plt.show()
