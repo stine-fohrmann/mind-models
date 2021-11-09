@@ -41,9 +41,9 @@ t = np.linspace(0, 100, 100)
 Rt_plot = plt.figure(1)
 
 # solve system of diff. eq.
-S_values = np.linspace(1.5, 2, 10)
+S_values = np.linspace(0, 2, 10)
 # initial condition
-R_0_values = [0]
+R_0_values = [1]
 
 R_asymptote = []
 
