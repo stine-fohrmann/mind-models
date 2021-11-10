@@ -16,7 +16,12 @@ def odes(x, t, s):
     J_3 = 0.05
     J_4 = 0.05
     S = s
-    # S = S + 2*np.sin(t/10)
+    a = 0.6   # amplitude
+    b = 0.1   # frequency
+    S = S + a*np.sin(b*t)
+
+    plt.figure(1)
+    plt.plot(t, S, '.', color='r')
 
     # assign each ODE to a vector element
     R = x[0]
@@ -36,14 +41,15 @@ def goldbeter_koshland(u, v, J, K):
 
 
 # declare time vector
-t = np.linspace(0, 100, 100)
+t = np.linspace(0, 500, 1000)
 
 Rt_plot = plt.figure(1)
 
 # solve system of diff. eq.
-S_values = np.linspace(0, 2, 10)
+# S_values = np.linspace(1.6, 1.8, 10)
+S_values = [1.3]
 # initial condition
-R_0_values = [1]
+R_0_values = [0]
 
 R_asymptote = []
 
