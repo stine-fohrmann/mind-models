@@ -5,51 +5,74 @@ import matplotlib.pyplot as plt
 
 
 # function that returns dy/dt
-def odes(x, t):
+def odes(x, t, s):
     # constants
-    k_0 = 0.01
+    k_0 = 4
     k_1 = 1
-    k_2 = 5
-    K_m1 = 0.05
-    K_m2 = 0.05
-    a = 1
-    S = 2 + 0.1*np.sin(t)
+    k_2 = 1
+    k_2prime = 1
+    k_3 = 1
+    k_4 = 1
+    k_5 = 0.1
+    k_6 = 0.075
+    J_3 = 0.3
+    J_4 = 0.3
+    S = s
+    S = S + 2*np.sin(t*20)
 
     # assign each ODE to a vector element
     R = x[0]
-    #R_P = x[2]
-    #R_T = 1
+    X = x[1]
 
-    # define each ODE
-    # sigmoidal:
-    # dRdt = k_0 + k_1*S - k_2*R
-    # dR_Pdt = (k_1*S * (R_T - R_P))/(K_m1 + R_T - R_P) - (k_2*R_P)/(K_m2+R_P)
+    def E(R):
+        return goldbeter_koshland(k_3*R, k_4, J_3, J_4)
 
-    # linear:
-    dRdt = k_0 + k_1 * S - k_2 * R
-    #R_T = R + R_P
-    #dR_Pdt = k_1 * S * (R_T - R_P) - k_2 * R_P
+    # define each ODE: mutual inhibition model (f)
+    dRdt = k_0*E(R) + k_1*S - k_2 * R -k_2prime * X * R
+    dXdt = k_5*R - k_6*X
 
-    return [dRdt]
+    return [dRdt, dXdt]
 
 
-# initial condition
-x_0 = [1]
+def goldbeter_koshland(u, v, J, K):
+    G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
+    return G
 
-# print(odes(x=x_0, t=0))
 
-# declare a time vector
-t = np.linspace(0, 10, 100)
+# declare time vector
+t = np.linspace(0, 100, 1000)
+
+Rt_plot = plt.figure(1)
 
 # solve system of diff. eq.
-x = odeint(odes, x_0, t)
+S_values = [0.2]
+# initial condition
+R_0_values = [1, 1]
 
-R = x[:, 0]
-#R_P = x[:, 1]
-#S = x[:, 2]
+R_asymptote = []
 
-# plot results
-plt.plot(t, R)
-plt.xlabel('t')
+for S in S_values:
+    x = odeint(odes, R_0_values, t, args=(S,))
+    R = x[:, 0]
+    X = x[:, 1]
+    R_asymptote.append(R[-1])
+    plt.plot(X, R, label=f'R against X')
+    #plt.plot(X, -R, label=f'-R against X')
+
+
+#plt.title('$R(t)$ for different $S$ and $R_0=0$')
+plt.xlabel('$X$')
 plt.ylabel('$R$')
+plt.legend(loc='lower right')
+#plt.xlim([0, 1.5])
+#plt.ylim([0, 3])
+
+
+RS_plot = plt.figure(2)
+plt.plot(t, X)
+plt.plot(t, R)
+plt.title('Stable values that $R$ approaches over time, depending on $S$')
+plt.xlabel('$S$')
+plt.ylabel(r'$R$ as $t \rightarrow \infty$')
+
 plt.show()
