@@ -34,7 +34,7 @@ def odes2(x, t, s):
     return [dXdt, dY_pdt, dR_Pdt]
 
 # function that returns dy/dt
-def odes(x, t):
+def odes(x, t, s = 1):
     # constants
     #r = odeint(odes2, x, t, args=(S,))
     #S = r[:, 0]
@@ -95,13 +95,29 @@ def goldbeter_koshland(u, v, J, K):
     G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
     return G
 
-
-# declare time vector
 t = np.linspace(0, 100, 100)
+S_values = [2]
 
+# initial condition
+X_0 = 5
+Y_P0 = 0.9
+R_P0 = 0.1
+init_cond = [X_0, Y_P0, R_P0, 0]
+
+# R_asymptote = []
+
+for S in S_values:
+    x = odeint(odes, init_cond, t, args=(S,))
+    X = x[:, 0]
+    Y_P = x[:, 1]
+    R_P = x[:, 2]
+# declare time vector
+
+"""
 #Rt_plot = plt.figure(1)
 
 # solve system of diff. eq.
+#S_values = np.linspace(0, 2, 10)
 #S_values = np.linspace(0, 2, 10)
 S = 1
 # initial condition
@@ -110,9 +126,10 @@ x_0 = [1,1,1,1]
 #signal = odeint(odes2, x_0, t, args=(S,))
 #x = odeint(odes, x_0, t, args=(signal,))
 x = odeint(odes, x_0, t)
-#x = odeint(odes2, x_0, t,args=(1,))
-R = x[:, 3]
-R_P = x[:,2]
+#x = odeint(odes2, x_0, t,args=(1,)
+# )"""
+#R = x[:, 3]
+#R_P = x[:,2]
 
 R_asymptote = []
 """
