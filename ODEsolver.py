@@ -111,7 +111,8 @@ x_0 = [1,1,1,1]
 #x = odeint(odes, x_0, t, args=(signal,))
 x = odeint(odes, x_0, t)
 #x = odeint(odes2, x_0, t,args=(1,))
-R = x[:, 1]
+R = x[:, 3]
+R_P = x[:,2]
 
 R_asymptote = []
 """
@@ -129,7 +130,7 @@ plt.ylabel('$R(t)$')
 plt.legend(loc='lower right')
 
 RS_plot = plt.figure(1)
-plt.plot(t,R, '.')
+plt.plot(t,R_P, '.')
 plt.title('Stable values that $R$ approaches over time, depending on $S$')
 plt.xlabel('$S$')
 plt.ylabel(r'$R$ as $t \rightarrow \infty$')
