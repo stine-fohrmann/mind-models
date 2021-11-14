@@ -9,9 +9,10 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     # constants
     k_0 = 0
     k_1 = 1
-    k_1 = .9
+    #k_1 = 1.7
     k_2 = 0.01
     k_2prime = 10
+
     k_3 = 0.2
     k_4 = 0.2
     k_5 = 0.1
@@ -28,6 +29,7 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     K_0 = 0
     K_1 = 0.05
     K_2 = 0.1
+    #K_2 = 0.03
     K_2prime = 0.5
     K_3 = 0.2
     K_4 = 1
@@ -66,36 +68,29 @@ def goldbeter_koshland(u, v, J, K):
     G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
     return G
 
-t = np.linspace(0, 350, 300)
-S_values = [1]
-#a_values = [0.3]
-#b_values = [0.0953]
-a_values = [.8]
-b_values = [0.065]
-#amul = 1.6
-#bmul = 0.8
-amul = 0.2
-bmul = 0.8
-ainit,binit = a_values[0],b_values[0]
-am, bm = a_values[0],b_values[0]
-for mul in range(2):
-    mul = mul + 1
-    am = amul*mul + ainit
-    bm = bmul* mul + binit
-    print(f"a={round(am,4)}, b={round(bm,4)}")
-    a_values.append(a_values[0]*am)
-    b_values.append(b_values[0]*bm)
+t = np.linspace(0, 500, 300)
+a_values = [0.39]
+b_values = [0.07]
+a_step = 0        # stepwise change of a
+b_step = 0.005    # stepwise change of b (ish)
+
+plots = 6
+for mul in range(plots):
+    mul += 1           #accumulator
+    # appending the different frequences and amplitudes
+    a_values.append(a_values[0] + a_step * mul)
+    b_values.append(b_values[0] + b_step * mul**1.2)
 
 
 # initial condition
 X_0 = 5
 Y_P0 = 0.9
 R_P0 = 0.1
-R    = 0.01
+R    = 0.001
 init_cond = [X_0, Y_P0, R_P0, R]
 
 #plt.figure(figsize=(14, 6), dpi=80)
-fig,ax = plt.subplots(3,1,figsize = (11,5))
+fig,ax = plt.subplots(plots+1,1,figsize = (11,5))
 #fig.figure(figsize=(14, 6), dpi=80)
 
 # R_asymptote = []
