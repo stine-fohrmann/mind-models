@@ -34,6 +34,8 @@ def odes2(x, t, s):
     return [dXdt, dY_pdt, dR_Pdt]
 
 def odes(x, t, s):
+
+
     # constants
     k_0 = 0
     k_1 = 1
@@ -50,20 +52,43 @@ def odes(x, t, s):
     K_m5 = 0.01
     K_m6 = 0.01
     S = s
+
     # S = S + 2*np.sin(t/10)
+    K_0 = 0
+    K_1 = 0.05
+    K_2 = 0.1
+    K_2prime = 0.5
+    K_3 = 0.2
+    K_4 = 1
+    J_3 = 0.05
+    J_4 = 0.05
+    S = s
+    a = 0.6   # amplitude
+    b = 0.1   # frequency
+    #S = S + a*np.sin(b*t)
+
+
+    # assign each ODE to a vector element
+
+    def E(R):
+        return goldbeter_koshland(K_3, K_4 * R, J_3, J_4)
+
+    # define each ODE: mutual inhibition model (f)
 
     # assign each ODE to a vector element
     X = x[0]
     Y_P = x[1]
     R_P = x[2]
+    R = x[3]
 
 
     # define each ODE: mutual inhibition model (f)
     dXdt = k_0 + k_1 * S - k_2 * X - k_2prime * R_P * X
     dY_pdt = (k_3 * X * (Y_T-Y_P))/(K_m3 + Y_T - Y_P) - (k_4 * Y_P)/(K_m4 + R_P)
     dR_Pdt = (k_5 * Y_P * (R_T - R_P))/(K_m5 + R_T - R_P) - (k_6 * R_P)/(K_m6 + R_P)
+    dRdt = K_0 + K_1 * R_P - K_2 * R - K_2prime * E(R) * R
 
-    return [dXdt, dY_pdt, dR_Pdt]
+    return [dXdt, dY_pdt, dR_Pdt, dRdt]
 
 
 
@@ -136,15 +161,16 @@ S_values = [2]
 X_0 = 5
 Y_P0 = 0.9
 R_P0 = 0.1
-init_cond = [X_0, Y_P0, R_P0]
+init_cond = [X_0, Y_P0, R_P0,0]
 
 # R_asymptote = []
 
 for S in S_values:
     x = odeint(odes, init_cond, t, args=(S,))
-    X = x[:, 0]
+    X   = x[:, 0]
     Y_P = x[:, 1]
     R_P = x[:, 2]
+    R   = x[:, 3]
 # declare time vector
 
 """
@@ -165,7 +191,7 @@ x = odeint(odes, x_0, t)
 #R = x[:, 3]
 #R_P = x[:,2]
 
-R_asymptote = []
+#R_asymptote = []
 """
 for S in S_values:
     for R_0 in R_0_values:
@@ -175,14 +201,14 @@ for S in S_values:
         R_asymptote.append(R[-1])
         plt.plot(t, R, label=f'$S={round(S,2)}$')
 """
-plt.title('$R(t)$ for different $S$ and $R_0=0$')
-plt.xlabel('$t$')
-plt.ylabel('$R(t)$')
-plt.legend(loc='lower right')
 
 RS_plot = plt.figure(1)
-plt.plot(t,R_P, '.')
+plt.plot(t,R,   color = 'm', label = "R")
+plt.plot(t,R_P, color = 'r', label = "$R_P$")
+plt.plot(t,X,   color = 'b', label = "X")
+plt.plot(t,Y_P, color = 'g', label = "$Y_P$")
 plt.title('Stable values that $R$ approaches over time, depending on $S$')
 plt.xlabel('$S$')
 plt.ylabel(r'$R$ as $t \rightarrow \infty$')
+plt.legend(loc='lower right')
 plt.show()
