@@ -20,7 +20,7 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     #a = 0.6   # amplitude
     #b = 0.1   # frequency
     S = s + a*np.sin(b*t)
-    S = s
+    #S = s
 
     k_0 = 4
     k_1 = 1
@@ -62,7 +62,7 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [0.5] # first value for amplibute to plot for
+a_values = [1.6] # first value for amplibute to plot for
 b_values = [0.07]
 a_step = 0        # stepwise change of a
 b_step = 0.005    # stepwise change of b (ish)
@@ -81,7 +81,7 @@ t = np.linspace(0, 500, 300)
 
 # initial condition
 X_0  = 5
-R1_0 = 0.6
+R1_0 = 0
 R_0  = 0.001
 init_cond = [R1_0,X_0, R_0]
 
@@ -95,8 +95,8 @@ for i in range(len(a_values)):
     a = a_values[i]
     b = b_values[i]
     x = odeint(odes, init_cond, t, args=(S,a,b))
-    X   = x[:, 1]
     R1  = x[:, 0]
+    X   = x[:, 1]
     R   = x[:, 2]
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
