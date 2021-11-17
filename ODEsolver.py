@@ -55,7 +55,7 @@ def odes(x, t, s, a = 0.6, b = 0.1):
 
     # activator inhibitor
     dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1
-    dXdt = k_5*R1 - k_6*X
+    dXdt  = k_5*R1     - k_6*X
 
     # mutual inhibition with negative feedback (R_P) as signal
     dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
@@ -68,14 +68,16 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [2] # first value for amplibute to plot for
-b_values = [1]
+a_values = [1] # first value for amplibute to plot for
+b_values = [0.1]
 s_values = [1.25]
 r_values  = [0.20748]
+r_values  = [0.1]
 a_step = 0        # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
 s_step = 0    # stepwise change of b (ish)
 r_step = 0.00001    # stepwise change of b (ish)
+r_step = 0.1    # stepwise change of b (ish)
 
 
 plots = 2
@@ -138,4 +140,4 @@ fig.legend(loc='lower right')
 
 
 
-#plt.show()
+plt.show()
