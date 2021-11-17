@@ -34,7 +34,8 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     J_4 = 0.05
     #a = 0.6   # amplitude
     #b = 0.1   # frequency
-    S = S + a*np.sin(b*t)
+    S = s + a*np.sin(b*t)
+    S = s
 
 
     # goldbeter_kosland
@@ -64,14 +65,14 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [0.39] # first value for amplibute to plot for
+a_values = [1] # first value for amplibute to plot for
 b_values = [0.07]
 a_step = 0        # stepwise change of a
 b_step = 0.005    # stepwise change of b (ish)
 
 S = 3
 
-plots = 6
+plots = 1
 for mul in range(plots):
     mul += 1           #accumulator
     # appending the different frequences and amplitudes
@@ -102,7 +103,8 @@ for i in range(len(a_values)):
     Y_P = x[:, 1]
     R_P = x[:, 2]
     R   = x[:, 3]
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    ax[i].plot(t,R_P, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
 
