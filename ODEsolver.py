@@ -6,22 +6,7 @@ import matplotlib.pyplot as plt
 def odes(x, t, s, a = 0.6, b = 0.1):
 
 
-    # constants for negative feedback oscillator
-    k_0 = 0
-    k_1 = 1
-    k_2 = 0.01
-    k_2prime = 10
-
-    k_3 = 0.2
-    k_4 = 0.2
-    k_5 = 0.1
-    k_6 = 0.04
-    Y_T = 1
-    R_T = 1
-    K_m3 = 0.01
-    K_m4 = 0.01
-    K_m5 = 0.01
-    K_m6 = 0.01
+ 
 
     # constants for mutual inhibition
     K_0 = 0
@@ -37,28 +22,39 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     S = s + a*np.sin(b*t)
     S = s
 
+    k_0 = 4
+    k_1 = 1
+    k_2 = 1
+    k_2prime = 1
+    k_3 = 1
+    k_4 = 1
+    k_5 = 0.1
+    k_6 = 0.075
+    J_3 = 0.3
+    J_4 = 0.3
 
-    # goldbeter_kosland
-    def E(R):
-        return goldbeter_koshland(K_3, K_4 * R, J_3, J_4)
+    # assign each ODE to a vector element
+
 
  
     # assign each ODE to a vector element
-    X   = x[0]
-    Y_P = x[1]
-    R_P = x[2]
-    R   = x[3]
+    R1 =  x[0]
+    X   = x[1]
+    R   = x[2]
 
+    def E(R):
+        return goldbeter_koshland(k_3*R1, k_4, J_3, J_4)
 
     # negative feedback oscillator
-    dXdt   = k_0 + k_1 * S - k_2 * X - k_2prime * R_P * X
-    dY_pdt = (k_3 * X * (Y_T-Y_P))/(K_m3 + Y_T - Y_P) - (k_4 * Y_P)/(K_m4 + R_P)
-    dR_Pdt = (k_5 * Y_P * (R_T - R_P))/(K_m5 + R_T - R_P) - (k_6 * R_P)/(K_m6 + R_P)
+
+    # define each ODE: mutual inhibition model (f)
+    dR1dt = k_0*E(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1
+    dXdt = k_5*R1 - k_6*X
 
     # mutual inhibition with negative feedback (R_P) as signal
-    dRdt   = K_0 + K_1 * R_P - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * R - K_2 * R - K_2prime * E(R) * R
 
-    return [dXdt, dY_pdt, dR_Pdt, dRdt]
+    return [dR1dt, dXdt, dRdt]
 
 def goldbeter_koshland(u, v, J, K):
     G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
