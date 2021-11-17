@@ -52,7 +52,8 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     dXdt = k_5*R1 - k_6*X
 
     # mutual inhibition with negative feedback (R_P) as signal
-    dRdt   = K_0 + K_1 * R - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    #dRdt   = K_0 + K_1 * R1 - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -61,7 +62,7 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [1] # first value for amplibute to plot for
+a_values = [0.5] # first value for amplibute to plot for
 b_values = [0.07]
 a_step = 0        # stepwise change of a
 b_step = 0.005    # stepwise change of b (ish)
@@ -80,10 +81,9 @@ t = np.linspace(0, 500, 300)
 
 # initial condition
 X_0  = 5
-Y_P0 = 0.9
-R_P0 = 0.1
+R1_0 = 0.6
 R_0  = 0.001
-init_cond = [X_0, Y_P0, R_P0, R_0]
+init_cond = [R1_0,X_0, R_0]
 
 fig,ax = plt.subplots(plots+1,1,figsize = (11,5))
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
@@ -95,14 +95,15 @@ for i in range(len(a_values)):
     a = a_values[i]
     b = b_values[i]
     x = odeint(odes, init_cond, t, args=(S,a,b))
-    X   = x[:, 0]
-    Y_P = x[:, 1]
-    R_P = x[:, 2]
-    R   = x[:, 3]
+    X   = x[:, 1]
+    R1  = x[:, 0]
+    R   = x[:, 2]
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    ax[i].plot(t,R_P, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
+    print(f'max: {max(R1)}')
+    print(f'min: {min(R1)}')
 
 
 
