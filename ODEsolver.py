@@ -21,7 +21,7 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     #b = 0.1   # frequency
     S = s + a*np.sin(b*t)
     #S = s + a*np.cos(b*t)
-    #S = s
+    S = s
 
     # activator inhibitor
     k_0 = 4
@@ -58,8 +58,8 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     dXdt  = k_5*R1     - k_6*X
 
     # mutual inhibition with negative feedback (R_P) as signal
-    dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
-    #dRdt   = K_0 + K_1 * R1 - K_2 * R - K_2prime * E(R) * R
+    #dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * R1 - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -68,14 +68,16 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [1] # first value for amplibute to plot for
+a_values = [4] # first value for amplibute to plot for
 b_values = [0.1]
+b_values = [0.7]
 s_values = [1.25]
+s_values = [1]
 r_values  = [0.20748]
 r_values  = [0.1]
 a_step = 0        # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
-s_step = 0    # stepwise change of b (ish)
+s_step = 1    # stepwise change of b (ish)
 r_step = 0.00001    # stepwise change of b (ish)
 r_step = 0.1    # stepwise change of b (ish)
 
@@ -91,7 +93,7 @@ for mul in range(plots):
 
 
 
-t = np.linspace(0, 1000,1300)
+t = np.linspace(0, 200,200)
 
 S = 1.3
 # initial condition
@@ -120,19 +122,19 @@ for i in range(len(a_values)):
     x = odeint(odes, init_cond, t, args=(S,0,b))
     R2   = x[:, 2]
     asymp = R2[-1]
-    ax[i].plot(t,R2, color = "k")
-    ax[i].plot(t[-1],R2[-1], "*", color = "b")
+    #ax[i].plot(t,R2, color = "k")
+    #ax[i].plot(t[-1],R2[-1], "*", color = "b")
     x = odeint(odes, init_cond, t, args=(S,a,b))
     R1  = x[:, 0]
     X   = x[:, 1]
     R   = x[:, 2]
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
+    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
-    print(f's = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}')
+    #print(f's = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}')
     #print(f'max: {max(R1)}')
     #print(f'min: {min(R1)}')
 
