@@ -21,13 +21,13 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     #b = 0.1   # frequency
     S = s + a*np.sin(b*t)
     #S = s + a*np.cos(b*t)
-    S = s
+    #S = s
 
     # activator inhibitor
     k_0 = 4
     k_1 = 1
     k_2 = 1
-    #k_2 = 3
+    k_2 = 0.9
     k_2prime = 1
     k_3 = 1
     k_4 = 1
@@ -54,12 +54,14 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     # negative feedback oscillator
 
     # activator inhibitor
-    dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1
+    dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
+    #dR1dt = dR1dt*2 
     dXdt  = k_5*R1     - k_6*X
+    #dXdt  = dXdt *2
 
     # mutual inhibition with negative feedback (R_P) as signal
     #dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
-    dRdt   = K_0 + K_1 * R1 - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * (R1+0.2) - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -69,17 +71,23 @@ def goldbeter_koshland(u, v, J, K):
 
 
 a_values = [4] # first value for amplibute to plot for
+#a_values = [0.6] # first value for amplibute to plot for
 b_values = [0.1]
-b_values = [0.7]
-s_values = [1.25]
-s_values = [1]
-r_values  = [0.20748]
-r_values  = [0.1]
+b_values = [20]
+#b_values = [1]
+#s_values = [1]
+s_values = [0.1]    # for activ-inhib
+s_values = [1]    # for activ-inhib
+#r_values = [0.20748]
+#r_values = [0.2074]
+r_values = [0.3]
 a_step = 0        # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
-s_step = 1    # stepwise change of b (ish)
+s_step = 0    # stepwise change of b (ish)
+s_step = 0.05    # stepwise change of b (ish)
 r_step = 0.00001    # stepwise change of b (ish)
-r_step = 0.1    # stepwise change of b (ish)
+r_step = 0.0001    # stepwise change of b (ish)
+#r_step = 0.1    # stepwise change of b (ish)
 
 
 plots = 2
@@ -118,7 +126,7 @@ for i in range(len(a_values)):
     S = s_values[i]
     r = r_values[i]
     signal = S + a*np.sin(b*t)
-    #ax[i].plot(t,signal, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
+    #ax[i].plot(t,signal,  color = "g")
     x = odeint(odes, init_cond, t, args=(S,0,b))
     R2   = x[:, 2]
     asymp = R2[-1]
@@ -126,11 +134,14 @@ for i in range(len(a_values)):
     #ax[i].plot(t[-1],R2[-1], "*", color = "b")
     x = odeint(odes, init_cond, t, args=(S,a,b))
     R1  = x[:, 0]
+    R1 = [0.2+x for x in R1]
     X   = x[:, 1]
     R   = x[:, 2]
+    print(R1[5])
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
+    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
+    #ax[i].plot(t,R1,  color = "k")
     
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
