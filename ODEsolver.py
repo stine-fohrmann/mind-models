@@ -17,7 +17,7 @@ def odes(x, t, s):
     J_4 = 0.05
     S = s
     a = 0.6   # amplitude
-    b = 0.1   # frequency
+    b = 0.05   # frequency
     S = S + a*np.sin(b*t)
 
     plt.figure(1)
@@ -61,7 +61,8 @@ for S in S_values:
         R_asymptote.append(R[-1])
         plt.plot(t, R, label=f'$S={round(S,2)}$')
 
-plt.title('$R(t)$ for different $S$ and $R_0=0$')
+plt.title(f'$R(t)$ for $S = {S_values[0]} + 0.6 sin(0.05 t)$ and $R_0={R_0_values[0]}$')
+plt.ylim(0, 2)
 plt.xlabel('$t$')
 plt.ylabel('$R(t)$')
 plt.legend(loc='lower right')
