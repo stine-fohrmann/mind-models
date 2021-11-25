@@ -27,7 +27,6 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     k_0 = 4
     k_1 = 1
     k_2 = 1
-    k_2 = 0.9
     k_2prime = 1
     k_3 = 1
     k_4 = 1
@@ -60,8 +59,8 @@ def odes(x, t, s, a = 0.6, b = 0.1):
     #dXdt  = dXdt *2
 
     # mutual inhibition with negative feedback (R_P) as signal
-    #dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
-    dRdt   = K_0 + K_1 * (R1+0.2) - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    #dRdt   = K_0 + K_1 * (R1+0.2) - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -70,87 +69,80 @@ def goldbeter_koshland(u, v, J, K):
     return G
 
 
-a_values = [4] # first value for amplibute to plot for
-#a_values = [0.6] # first value for amplibute to plot for
-b_values = [0.1]
-b_values = [20]
-#b_values = [1]
-#s_values = [1]
-s_values = [0.1]    # for activ-inhib
-s_values = [1]    # for activ-inhib
-#r_values = [0.20748]
-#r_values = [0.2074]
+a_values = [0] # first value for amplibute to plot for
+b_values = [0]
+s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
 a_step = 0        # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
 s_step = 0    # stepwise change of b (ish)
-s_step = 0.05    # stepwise change of b (ish)
-r_step = 0.00001    # stepwise change of b (ish)
-r_step = 0.0001    # stepwise change of b (ish)
+r_step = 0    # stepwise change of b (ish)
 #r_step = 0.1    # stepwise change of b (ish)
 
 
-plots = 2
-for mul in range(plots):
-    mul += 1           #accumulator
-    # appending the different frequences and amplitudes
-    a_values.append(a_values[0] + a_step * mul)
-    b_values.append(b_values[0] + b_step * mul**1.2)
-    s_values.append(s_values[0] + s_step * mul)
-    r_values.append(r_values[0] + r_step * mul)
-
+plots = 1
+try:
+    for mul in range(plots-1):
+        mul += 1           #accumulator
+        # appending the different frequences and amplitudes
+        a_values.append(a_values[0] + a_step * mul)
+        b_values.append(b_values[0] + b_step * mul)
+        s_values.append(s_values[0] + s_step * mul)
+        r_values.append(r_values[0] + r_step * mul)
+except:
+    None
 
 
 t = np.linspace(0, 200,200)
 
 S = 1.3
 # initial condition
-X_0  = 5
-R1_0 = 0
+X_0  = 1
+R1_0 = 1
 R_0  = 0.25
-R_0_values  = 0.25
 init_cond = [R1_0,X_0, R_0]
-#signal = S + a_values[0]*np.sin(b_values[0]*t)
-#print(f'max: [{max(signal)}')
-#print(f'min: [{min(signal)}')
 
-fig,ax = plt.subplots(plots+1,1,figsize = (11,5))
+if plots != 1:
+    fig,ax = plt.subplots(plots,1,figsize = (11,5))
+else:
+    fig,ax = plt.subplots(figsize = (11,5))
+    ax = [ax]
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
 for i in range(len(a_values)):
     # iterate through the different a and b values to plot them
-    init_cond[-1]=r_values[i]
     a = a_values[i]
     b = b_values[i]
     S = s_values[i]
     r = r_values[i]
-    signal = S + a*np.sin(b*t)
+    init_cond[-1]=r
+    #signal = S + a*np.sin(b*t)
     #ax[i].plot(t,signal,  color = "g")
-    x = odeint(odes, init_cond, t, args=(S,0,b))
-    R2   = x[:, 2]
-    asymp = R2[-1]
+    #x = odeint(odes, init_cond, t, args=(S,0,b))
+    #R2   = x[:, 2]
     #ax[i].plot(t,R2, color = "k")
     #ax[i].plot(t[-1],R2[-1], "*", color = "b")
     x = odeint(odes, init_cond, t, args=(S,a,b))
     R1  = x[:, 0]
-    R1 = [0.2+x for x in R1]
     X   = x[:, 1]
     R   = x[:, 2]
-    print(R1[5])
-    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
-    #ax[i].plot(t,R1,  color = "k")
+    # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
+    maxR = max(R1)
+    minR = min(R1)
+    midR = maxR-minR
+    print(f'max: {round(maxR,3)}')
+    print(f'min: {round(minR,3)}')
+    print(f'mid: {round(midR,3)}')
+
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
-    #print(f's = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}')
-    #print(f'max: {max(R1)}')
-    #print(f'min: {min(R1)}')
 
 fig.legend(loc='lower right')
 
 
 
-plt.show()
+#plt.show()
