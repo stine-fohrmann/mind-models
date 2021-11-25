@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 import numpy as np
 import matplotlib.pyplot as plt
 
-def odes(x, t, s, a = 0.6, b = 0.1):
+def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1):
 
 
  
@@ -54,7 +54,8 @@ def odes(x, t, s, a = 0.6, b = 0.1):
 
     # activator inhibitor
     dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
-    #dR1dt = dR1dt*2 
+    #dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
+    dR1dt = dR1dt/freq
     dXdt  = k_5*R1     - k_6*X
     #dXdt  = dXdt *2
 
@@ -73,6 +74,7 @@ a_values = [0] # first value for amplibute to plot for
 b_values = [0]
 s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
+
 a_step = 0        # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
 s_step = 0    # stepwise change of b (ish)
@@ -110,6 +112,8 @@ else:
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
+freq = [1,2,3]
+
 for i in range(len(a_values)):
     # iterate through the different a and b values to plot them
     a = a_values[i]
@@ -123,20 +127,34 @@ for i in range(len(a_values)):
     #R2   = x[:, 2]
     #ax[i].plot(t,R2, color = "k")
     #ax[i].plot(t[-1],R2[-1], "*", color = "b")
-    x = odeint(odes, init_cond, t, args=(S,a,b))
+    x = odeint(odes, init_cond, t, args=(S,a,b, 3))
     R1  = x[:, 0]
+    maxR = max(R1)
+    minR = min(R1)
+    midR = (maxR-minR)/2
+    amplR = maxR-midR
+    
+    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    
+    x = odeint(odes, init_cond, t, args=(S,a,b, 2))
+    R_P  = x[:, 0]
+    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    #R1  = [2*x for x in R1]
     X   = x[:, 1]
     R   = x[:, 2]
-    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    #R1  = [2*x for x in R1]
+    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y")
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
-    maxR = max(R1)
-    minR = min(R1)
-    midR = maxR-minR
+    maxR = max(R_P)
+    minR = min(R_P)
+    midR = (maxR-minR)/2
+    amplR = maxR-midR
     print(f'max: {round(maxR,3)}')
-    print(f'min: {round(minR,3)}')
     print(f'mid: {round(midR,3)}')
+    print(f'min: {round(minR,3)}')
+    print(f'amplitude: {round(amplR,3)}')
 
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
@@ -145,4 +163,4 @@ fig.legend(loc='lower right')
 
 
 
-#plt.show()
+plt.show()
