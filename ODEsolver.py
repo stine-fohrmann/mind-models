@@ -81,7 +81,13 @@ s_step = 0    # stepwise change of b (ish)
 r_step = 0    # stepwise change of b (ish)
 #r_step = 0.1    # stepwise change of b (ish)
 
-
+"""
+how to solve the amplitude problem
+1) run odeint with just constant signal and activator inhibitor
+2) extract amplitude from that ((max-min)/2)
+3) get number to multiply R_P response with for the mutual inhibition: multiplyer = wished amplitude / extracted amplitude, also get constant
+4) add/multiply constants in dRdt inside ODE
+"""
 plots = 1
 try:
     for mul in range(plots-1):
