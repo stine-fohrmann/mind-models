@@ -3,7 +3,7 @@ from scipy.integrate import odeint
 import numpy as np
 import matplotlib.pyplot as plt
 
-def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1):
+def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1, add = 0):
 
 
  
@@ -60,8 +60,8 @@ def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1):
     #dXdt  = dXdt *2
 
     # mutual inhibition with negative feedback (R_P) as signal
-    dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
-    #dRdt   = K_0 + K_1 * (R1+0.2) - K_2 * R - K_2prime * E(R) * R
+    Rdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    # dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -110,6 +110,7 @@ R1_0 = 1
 R_0  = 0.25
 init_cond = [R1_0,X_0, R_0]
 
+
 if plots != 1:
     fig,ax = plt.subplots(plots,1,figsize = (11,5))
 else:
@@ -119,7 +120,8 @@ fig.suptitle("Response from mutual inhibition when \"negative feedback oscillato
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
 freq = [1,2,3]
-
+reqAmpl = 0.6
+reqCon = 1.3
 for i in range(len(a_values)):
     # iterate through the different a and b values to plot them
     a = a_values[i]
@@ -133,30 +135,48 @@ for i in range(len(a_values)):
     #R2   = x[:, 2]
     #ax[i].plot(t,R2, color = "k")
     #ax[i].plot(t[-1],R2[-1], "*", color = "b")
-    x = odeint(odes, init_cond, t, args=(S,a,b, 3))
+    x = odeint(odes, init_cond, t, args=(S,a,b, 1))
     R1  = x[:, 0]
     maxR = max(R1)
     minR = min(R1)
-    midR = (maxR-minR)/2
-    amplR = maxR-midR
-    
+    # print(f'index nr: {type(R1.tolist)}')
+    amplR =  (maxR-minR)/2
+    midR  = maxR-amplR
+    mult  = reqAmpl/amplR
+    #nyR = (R1(x)-midR)*0.6/amplR + 1.3
+    #nyR = (R1(x)-midR)*mult + reqCon
+    add   = reqCon - midR*mult
+    # R_P   = [mult*(x-midR)+reqCon for x in R1]
+    R_P   = [mult*x + add for x in R1]
+    #ax[i].plot(t,R_P, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     
-    x = odeint(odes, init_cond, t, args=(S,a,b, 2))
+    x = odeint(odes, init_cond, t, args=(S,a,b,1,mult,add ))
+    """
+    maxR = max(R_P)
+    minR = min(R_P)
+    # print(f'index nr: {type(R1.tolist)}')
+    amplR =  (maxR-minR)/2
+    midR  = maxR-amplR
+    mult  = reqAmpl/amplR
+    add   = reqCon - midR
+    """
+    
+    #x = odeint(odes, init_cond, t, args=(S,a,b, mult, add))
     R_P  = x[:, 0]
-    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     #R1  = [2*x for x in R1]
     X   = x[:, 1]
     R   = x[:, 2]
     #R1  = [2*x for x in R1]
-    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y")
+    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y")
     #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
-    maxR = max(R_P)
-    minR = min(R_P)
-    midR = (maxR-minR)/2
-    amplR = maxR-midR
+    #maxR = max(R_P)
+    #minR = min(R_P)
+    #midR = (maxR-minR)/2
+    # amplR = maxR-midR
     print(f'max: {round(maxR,3)}')
     print(f'mid: {round(midR,3)}')
     print(f'min: {round(minR,3)}')
