@@ -9,36 +9,28 @@ def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1, add = 0):
  
 
     # constants for mutual inhibition
-    K_0 = 0
-    K_1 = 0.05
-    K_2 = 0.1
+    K_0      = 0
+    K_1      = 0.05
+    K_2      = 0.1
     K_2prime = 0.5
-    K_3 = 0.2
-    K_4 = 1
-    J_3 = 0.05
-    J_4 = 0.05
-    #a = 0.6   # amplitude
-    #b = 0.1   # frequency
-    S = s + a*np.sin(b*t)
-    #S = s + a*np.cos(b*t)
-    #S = s
+    K_3      = 0.2
+    K_4      = 1
+    J_3      = 0.05
+    J_4      = 0.05
 
     # activator inhibitor
-    k_0 = 4
-    k_1 = 1
-    k_2 = 1
+    k_0      = 4
+    k_1      = 1
+    k_2      = 1
     k_2prime = 1
-    k_3 = 1
-    k_4 = 1
-    k_5 = 0.1
-    k_6 = 0.075
-    j_3 = 0.3
-    j_4 = 0.3
-
-    # assign each ODE to a vector element
-
-
+    k_3      = 1
+    k_4      = 1
+    k_5      = 0.1
+    k_6      = 0.075
+    j_3      = 0.3
+    j_4      = 0.3
  
+    S   = s + a*np.sin(b*t)
     # assign each ODE to a vector element
     R1 =  x[0]
     X   = x[1]
@@ -50,12 +42,9 @@ def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1, add = 0):
     def E(R):
         return goldbeter_koshland(K_3, K_4 * R, J_3, J_4)
 
-    # negative feedback oscillator
-
     # activator inhibitor
     dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
-    #dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
-    dR1dt = dR1dt/freq
+    dR1dt = dR1dt/freq # an attempt to manipulate the frequency of the oscillations
     dXdt  = k_5*R1     - k_6*X
     #dXdt  = dXdt *2
 
@@ -87,9 +76,9 @@ r_values = [0.3]
 
 # If we want to plot more things with different inputs
 a_step = 0    # stepwise change of a
-b_step = 0.01    # stepwise change of b (ish)
-s_step = 0    # stepwise change of b (ish)
-r_step = 0    # stepwise change of b (ish)
+b_step = 0.01    # stepwise change of b 
+s_step = 0    # stepwise change of signal
+r_step = 0    # stepwise change of R_0 (ish)
 
 plots = 5     # number of plots in the same window
 
@@ -126,7 +115,7 @@ t = np.linspace(0, 1000,500)
 # initial condition
 X_0  = 1
 R1_0 = 1
-init_cond = [R1_0,X_0, None]
+init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
 
 # creating the amount of plots given earlier
 if plots != 1:
