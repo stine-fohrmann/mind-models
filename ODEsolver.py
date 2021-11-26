@@ -60,8 +60,8 @@ def odes(x, t, s, a = 0.6, b = 0.1, freq = 1, mult = 1, add = 0):
     #dXdt  = dXdt *2
 
     # mutual inhibition with negative feedback (R_P) as signal
-    Rdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
-    # dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
+    #dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -75,20 +75,20 @@ b_values = [0]
 s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
 
-a_step = 0        # stepwise change of a
+""" For direct oscillatory signal for act-inhib
+a_values = [0.6] # first value for amplibute to plot for
+s_values = [1.3]    # for activ-inhib
+b_values = [0.05]
+"""
+
+# If we want to plot more things with different inputs
+a_step = 0    # stepwise change of a
 b_step = 0    # stepwise change of b (ish)
 s_step = 0    # stepwise change of b (ish)
 r_step = 0    # stepwise change of b (ish)
-#r_step = 0.1    # stepwise change of b (ish)
 
-"""
-how to solve the amplitude problem
-1) run odeint with just constant signal and activator inhibitor
-2) extract amplitude from that ((max-min)/2)
-3) get number to multiply R_P response with for the mutual inhibition: multiplyer = wished amplitude / extracted amplitude, also get constant
-4) add/multiply constants in dRdt inside ODE
-"""
-plots = 1
+plots = 1     # number of plots in the same window
+
 try:
     for mul in range(plots-1):
         mul += 1           #accumulator
@@ -101,16 +101,14 @@ except:
     None
 
 
-t = np.linspace(0, 200,200)
+t = np.linspace(0, 500,500)
 
-S = 1.3
 # initial condition
 X_0  = 1
 R1_0 = 1
-R_0  = 0.25
-init_cond = [R1_0,X_0, R_0]
+init_cond = [R1_0,X_0, None]
 
-
+# creating the amount of plots given earlier
 if plots != 1:
     fig,ax = plt.subplots(plots,1,figsize = (11,5))
 else:
@@ -119,9 +117,9 @@ else:
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
-freq = [1,2,3]
-reqAmpl = 0.6
-reqCon = 1.3
+reqAmpl = 0.6 # The amplitude of oscillatory signal we know works 
+reqCon  = 1.3 # the freq of the signal we know works
+freq    = 8   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 for i in range(len(a_values)):
     # iterate through the different a and b values to plot them
     a = a_values[i]
@@ -131,52 +129,29 @@ for i in range(len(a_values)):
     init_cond[-1]=r
     #signal = S + a*np.sin(b*t)
     #ax[i].plot(t,signal,  color = "g")
-    #x = odeint(odes, init_cond, t, args=(S,0,b))
-    #R2   = x[:, 2]
-    #ax[i].plot(t,R2, color = "k")
-    #ax[i].plot(t[-1],R2[-1], "*", color = "b")
-    x = odeint(odes, init_cond, t, args=(S,a,b, 1))
+    
+    ''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
+    E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
+    x = odeint(odes, init_cond, t, args=(S,a,b, freq)) 
     R1  = x[:, 0]
-    maxR = max(R1)
-    minR = min(R1)
-    # print(f'index nr: {type(R1.tolist)}')
-    amplR =  (maxR-minR)/2
-    midR  = maxR-amplR
-    mult  = reqAmpl/amplR
-    #nyR = (R1(x)-midR)*0.6/amplR + 1.3
-    #nyR = (R1(x)-midR)*mult + reqCon
-    add   = reqCon - midR*mult
-    # R_P   = [mult*(x-midR)+reqCon for x in R1]
-    R_P   = [mult*x + add for x in R1]
-    #ax[i].plot(t,R_P, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
+    maxR  = max(R1)
+    minR  = min(R1)
+    amplR = (maxR-minR)/2                # The "amplitude" of the act-inhib
+    midR  = maxR-amplR                   # The value which the act-inhib oscillates around
+    mult  = reqAmpl/amplR                # what we want to multiply R_P with to stay within the right values
+    add   = reqCon - midR*mult           # What we need to add to R_P to have the act-inhib at the right height
+    R_P1  = [mult*x + add for x in R1]   # Making a list of the corrected act-inhib in order to plot it
+    ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     
-    x = odeint(odes, init_cond, t, args=(S,a,b,1,mult,add ))
-    """
-    maxR = max(R_P)
-    minR = min(R_P)
-    # print(f'index nr: {type(R1.tolist)}')
-    amplR =  (maxR-minR)/2
-    midR  = maxR-amplR
-    mult  = reqAmpl/amplR
-    add   = reqCon - midR
-    """
-    
-    #x = odeint(odes, init_cond, t, args=(S,a,b, mult, add))
-    R_P  = x[:, 0]
-    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
-    #R1  = [2*x for x in R1]
-    X   = x[:, 1]
-    R   = x[:, 2]
-    #R1  = [2*x for x in R1]
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y")
-    #ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
+    R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
+    X   = x[:, 1] 
+    R   = x[:, 2] # mutual inhibition with act-inhib signal
+    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
-    #maxR = max(R_P)
-    #minR = min(R_P)
-    #midR = (maxR-minR)/2
-    # amplR = maxR-midR
     print(f'max: {round(maxR,3)}')
     print(f'mid: {round(midR,3)}')
     print(f'min: {round(minR,3)}')
