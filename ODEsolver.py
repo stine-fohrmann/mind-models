@@ -69,25 +69,29 @@ def goldbeter_koshland(u, v, J, K):
     G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
     return G
 
+''' creates some interesting results. for keeping
+a_values = [0.2] # first value for amplibute to plot for
+b_values = [0.2]
 
-a_values = [0] # first value for amplibute to plot for
-b_values = [0]
-s_values = [0.2]    # for activ-inhib
-r_values = [0.3]
-
+'''
 """ For direct oscillatory signal for act-inhib
 a_values = [0.6] # first value for amplibute to plot for
 s_values = [1.3]    # for activ-inhib
 b_values = [0.05]
 """
 
+a_values = [0.17] # first value for amplibute to plot for
+b_values = [0.16]
+s_values = [0.2]    # for activ-inhib
+r_values = [0.3]
+
 # If we want to plot more things with different inputs
 a_step = 0    # stepwise change of a
-b_step = 0    # stepwise change of b (ish)
+b_step = 0.01    # stepwise change of b (ish)
 s_step = 0    # stepwise change of b (ish)
 r_step = 0    # stepwise change of b (ish)
 
-plots = 1     # number of plots in the same window
+plots = 5     # number of plots in the same window
 
 try:
     for mul in range(plots-1):
@@ -100,8 +104,24 @@ try:
 except:
     None
 
+# Since actual max/min may be before the system has reached steady state, we have to take a later local extrema
+def maxmin(lis):
+    max = 0; min = 0; counter = 1; maxVal,minVal = 0,0
+    while max <  5 and min < 5:
+        prev    = lis[counter-1]
+        current = lis[counter]
+        next    = lis[counter+1]
+        if current > prev and current > next:
+            maxVal = current
+            max += 1
+        elif current < prev and current < next:
+            minVal = current
+            min += 1
+        counter += 1
+    return maxVal,minVal
 
-t = np.linspace(0, 500,500)
+
+t = np.linspace(0, 1000,500)
 
 # initial condition
 X_0  = 1
@@ -132,24 +152,28 @@ for i in range(len(a_values)):
     
     ''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
     E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
-    x = odeint(odes, init_cond, t, args=(S,a,b, freq)) 
+    x = odeint(odes, init_cond, t, args=(S,0,b, freq)) 
     R1  = x[:, 0]
-    ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
-    maxR  = max(R1)
-    minR  = min(R1)
+    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
+    maxR,minR = maxmin(R1)
+    #maxR  = max(R1)
+    #minR  = min(R1)
     amplR = (maxR-minR)/2                # The "amplitude" of the act-inhib
     midR  = maxR-amplR                   # The value which the act-inhib oscillates around
     mult  = reqAmpl/amplR                # what we want to multiply R_P with to stay within the right values
     add   = reqCon - midR*mult           # What we need to add to R_P to have the act-inhib at the right height
     R_P1  = [mult*x + add for x in R1]   # Making a list of the corrected act-inhib in order to plot it
-    ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
+    # ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     
     x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
     R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
     X   = x[:, 1] 
     R   = x[:, 2] # mutual inhibition with act-inhib signal
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
+    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    ax2 = ax[i].twinx()
+    #ax2.plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
+    # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
     
     print(f'max: {round(maxR,3)}')
