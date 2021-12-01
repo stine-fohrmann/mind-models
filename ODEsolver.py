@@ -69,14 +69,14 @@ s_values = [1.3]    # for activ-inhib
 b_values = [0.05]
 """
 
-a_values = [0.17] # first value for amplibute to plot for
-b_values = [0.16]
+a_values = [0.21] # first value for amplibute to plot for
+b_values = [0.18] # 0.18 works with 0.17 on a
 s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
 
 # If we want to plot more things with different inputs
-a_step = 0    # stepwise change of a
-b_step = 0.01    # stepwise change of b 
+a_step = 0.01    # stepwise change of a
+b_step = 0    # stepwise change of b 
 s_step = 0    # stepwise change of signal
 r_step = 0    # stepwise change of R_0 (ish)
 
@@ -119,11 +119,18 @@ R1_0 = 1
 init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
 
 # creating the amount of plots given earlier
+
+"""
+
 if plots != 1:
     fig,ax = plt.subplots(plots,1,figsize = (11,5))
 else:
     fig,ax = plt.subplots(figsize = (11,5))
     ax = [ax]
+"""
+""" TEMPORARY """
+fig,ax = plt.subplots(2,1,figsize = (11,5))
+
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
@@ -162,9 +169,16 @@ for i in range(len(a_values)):
     R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
     X   = x[:, 1] 
     R   = x[:, 2] # mutual inhibition with act-inhib signal
-    ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     #ax2 = ax[i].twinx()
+    # x_val = R_P
+    # ax[i].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
     #ax2.plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
+    
+    # for plotting in one figure
+    c = next(colors)
+    ax[1].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
+    ax[0].plot(t  ,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
     
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
@@ -176,7 +190,7 @@ for i in range(len(a_values)):
     """
 
     ax[i].set(ylabel="R")
-    ax[i].set(xlabel="T")
+    ax[i].set(xlabel="S")
 
 fig.legend(loc='lower right')
 
