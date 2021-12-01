@@ -144,8 +144,8 @@ for i in range(len(a_values)):
     S = s_values[i]
     r = r_values[i]
     init_cond[-1]=r
-    #signal = S + a*np.sin(b*t)
-    #ax[i].plot(t,signal,  color = "g")
+    signal = S + a*np.sin(b*t)
+    ax[i].plot(t,signal,  color = "g")
     
     ''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
     E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
@@ -162,7 +162,7 @@ for i in range(len(a_values)):
     mult  = reqAmpl/amplR                # what we want to multiply R_P with to stay within the right values
     add   = reqCon - midR*mult           # What we need to add to R_P to have the act-inhib at the right height
     R_P1  = [mult*x + add for x in R1]   # Making a list of the corrected act-inhib in order to plot it
-    #ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
+    ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     
     x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
@@ -177,7 +177,7 @@ for i in range(len(a_values)):
     
     # for plotting in one figure
     c = next(colors)
-    ax[1].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
+    # ax[1].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
     ax[0].plot(t  ,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
     
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
