@@ -71,6 +71,10 @@ b_values = [0.05]
 
 a_values = [0.21] # first value for amplibute to plot for
 b_values = [0.18] # 0.18 works with 0.17 on a
+
+a_values = [0.20] # first value for amplibute to plot for
+b_values = [0.185] # 0.18 works with 0.17 on a
+
 s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
 
@@ -122,63 +126,65 @@ init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
 
 """
 
+"""
 if plots != 1:
     fig,ax = plt.subplots(plots,1,figsize = (11,5))
 else:
     fig,ax = plt.subplots(figsize = (11,5))
     ax = [ax]
-"""
 """ TEMPORARY """
-fig,ax = plt.subplots(2,1,figsize = (11,5))
+# fig,ax = plt.subplots(2,1,figsize = (11,5))
 
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
 reqAmpl = 0.6 # The amplitude of oscillatory signal we know works 
 reqCon  = 1.3 # the freq of the signal we know works
-freq    = 8   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
+# reqAmpl = 0.7 # The amplitude of oscillatory signal we know works 
+# reqCon  = 1.25 # the freq of the signal we know works
+freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 for i in range(len(a_values)):
     # iterate through the different a and b values to plot them
-    a = a_values[i]
-    b = b_values[i]
-    S = s_values[i]
-    r = r_values[i]
+    a = a_values[i]; b = b_values[i]; S = s_values[i]; r = r_values[i]
     init_cond[-1]=r
     signal = S + a*np.sin(b*t)
-    ax[i].plot(t,signal,  color = "g")
+    # ax[i].plot(t,signal,  color = "g")
     
     ''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
     E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
     x = odeint(odes, init_cond, t, args=(S,0,b, freq)) 
-    R1  = x[:, 0]
+    R_P1  = x[:, 0]
     # ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
-    maxR,minR,peaks = maxmin(R1)
+    maxR,minR,peaks = maxmin(R_P1)
     period = 1/(peaks[-1]-peaks[-2])
     print(period)
-    #maxR  = max(R1)
-    #minR  = min(R1)
     amplR = (maxR-minR)/2                # The "amplitude" of the act-inhib
     midR  = maxR-amplR                   # The value which the act-inhib oscillates around
     mult  = reqAmpl/amplR                # what we want to multiply R_P with to stay within the right values
     add   = reqCon - midR*mult           # What we need to add to R_P to have the act-inhib at the right height
-    R_P1  = [mult*x + add for x in R1]   # Making a list of the corrected act-inhib in order to plot it
-    ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
-    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
+    R_P1  = [mult*x + add for x in R_P1]   # Making a list of the corrected act-inhib in order to plot it
+    # ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
     
+    x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
+    R1    = x[:, 2]
+    # ax[i].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+    ax[i].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+
     x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
     R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
     X   = x[:, 1] 
     R   = x[:, 2] # mutual inhibition with act-inhib signal
-    #ax2 = ax[i].twinx()
-    # x_val = R_P
-    # ax[i].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    #ax2.plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
-    
-    # for plotting in one figure
     c = next(colors)
+    R_P  = [mult*x + add for x in R_P]   # Making a list of the corrected act-inhib in order to plot it
+    ax[i].plot(R_P,R, label = f"Mut-inhib + act-inhib WITH sinus", color = c)
+    # ax[i].plot(t,  R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
+    #ax[i].plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
+    
+
+    # ax[i].plot(t,  R, label = f"Mut-inhib + act-inhib with sinus", color = "b")
+    # for plotting in one figure
     # ax[1].plot(R_P,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
-    ax[0].plot(t  ,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
+    # ax[0].plot(t  ,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
     
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
