@@ -80,7 +80,7 @@ b_step = 0.01    # stepwise change of b
 s_step = 0    # stepwise change of signal
 r_step = 0    # stepwise change of R_0 (ish)
 
-plots = 5     # number of plots in the same window
+plots = 1     # number of plots in the same window
 
 try:
     for mul in range(plots-1):
@@ -95,7 +95,7 @@ except:
 
 # Since actual max/min may be before the system has reached steady state, we have to take a later local extrema
 def maxmin(lis):
-    max = 0; min = 0; counter = 1; maxVal,minVal = 0,0
+    max =0; min = 0; counter = 1; maxVal,minVal = 0,0; peaks = []
     while max <  5 and min < 5:
         prev    = lis[counter-1]
         current = lis[counter]
@@ -103,11 +103,12 @@ def maxmin(lis):
         if current > prev and current > next:
             maxVal = current
             max += 1
+            peaks.append(counter)
         elif current < prev and current < next:
             minVal = current
             min += 1
         counter += 1
-    return maxVal,minVal
+    return maxVal,minVal,peaks
 
 
 t = np.linspace(0, 1000,500)
@@ -143,8 +144,10 @@ for i in range(len(a_values)):
     E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
     x = odeint(odes, init_cond, t, args=(S,0,b, freq)) 
     R1  = x[:, 0]
-    #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
-    maxR,minR = maxmin(R1)
+    # ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "y") # plots the R_P, which is used as signal for dRdt
+    maxR,minR,peaks = maxmin(R1)
+    period = 1/(peaks[-1]-peaks[-2])
+    print(period)
     #maxR  = max(R1)
     #minR  = min(R1)
     amplR = (maxR-minR)/2                # The "amplitude" of the act-inhib
@@ -152,7 +155,7 @@ for i in range(len(a_values)):
     mult  = reqAmpl/amplR                # what we want to multiply R_P with to stay within the right values
     add   = reqCon - midR*mult           # What we need to add to R_P to have the act-inhib at the right height
     R_P1  = [mult*x + add for x in R1]   # Making a list of the corrected act-inhib in order to plot it
-    # ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
+    #ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m") # plots the R_P, which is used as signal for dRdt
     #ax[i].plot(t,R1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "m")
     
     x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
@@ -160,15 +163,17 @@ for i in range(len(a_values)):
     X   = x[:, 1] 
     R   = x[:, 2] # mutual inhibition with act-inhib signal
     ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = next(colors))
-    ax2 = ax[i].twinx()
+    #ax2 = ax[i].twinx()
     #ax2.plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
+    
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g")
     # ax[i].plot(t,R, label = f"a = {round(a,3)}, b = {round(b,3)}, s = {round(S,3)}, r = {round(r,3)}, asymp = {round(R2[-1],3)}", color = next(colors))
-    
+    """
     print(f'max: {round(maxR,3)}')
     print(f'mid: {round(midR,3)}')
     print(f'min: {round(minR,3)}')
     print(f'amplitude: {round(amplR,3)}')
+    """
 
     ax[i].set(ylabel="R")
     ax[i].set(xlabel="T")
