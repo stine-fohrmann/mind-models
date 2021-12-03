@@ -73,7 +73,11 @@ a_values = [0.21] # first value for amplibute to plot for
 b_values = [0.18] # 0.18 works with 0.17 on a
 
 a_values = [0.20] # first value for amplibute to plot for
+b_values = [0.20] # 0.18 works with 0.17 on a
+
+a_values = [0.20] # first value for amplibute to plot for
 b_values = [0.185] # 0.18 works with 0.17 on a
+
 
 s_values = [0.2]    # for activ-inhib
 r_values = [0.3]
@@ -167,14 +171,9 @@ for i in range(len(a_values)):
     
     x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
     R1    = x[:, 2]
-    if not color:
-        if R[-1] > r:
-            color = 'lightskyblue'
-        else:
-            color = 'pink'
-    ax[i].plot(signal, R, color=color)
-    ax[i].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "b")
-    # ax[i].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+
+    # ax[i].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "b")
+    ax[i].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
 
     x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
     R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
@@ -182,8 +181,8 @@ for i in range(len(a_values)):
     R   = x[:, 2] # mutual inhibition with act-inhib signal
     c = next(colors)
     R_P  = [mult*x + add for x in R_P]   # Making a list of the corrected act-inhib in order to plot it
-    # ax[i].plot(R_P,R, label = f"Mut-inhib + act-inhib WITH sinus", color = c)
-    ax[i].plot(t,  R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
+    ax[i].plot(R_P,R, label = f"Mut-inhib + act-inhib WITH sinus", color = c)
+    # ax[i].plot(t,  R, label = f"a = {round(a,3)}, b = {round(b,3)}", color = c)
     # ax[i].plot(t,R_P,  "m") # plots the R_P, which is used as signal for dRdt
     
 
