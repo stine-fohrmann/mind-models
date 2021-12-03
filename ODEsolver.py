@@ -167,6 +167,12 @@ for i in range(len(a_values)):
     
     x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
     R1    = x[:, 2]
+    if not color:
+        if R[-1] > r:
+            color = 'lightskyblue'
+        else:
+            color = 'pink'
+    ax[i].plot(signal, R, color=color)
     ax[i].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "b")
     # ax[i].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
 
