@@ -29,29 +29,42 @@ def odes(x, t, s):
 t = np.linspace(0, 15, 100)
 
 # solve system of diff. eq. for 0 < S < 4, R_0=1,2
-S_values = np.linspace(0, 2, 5)
+S_values = np.linspace(0, 3, 100)
 # S_values = [1]
 # initial condition
 # R_P_values = [0.1]
-R_P_values = np.linspace(0, 1, 3)
+R_P_values = np.linspace(0, 1, 2)
 colors = ['r', 'c', 'g', 'b', 'm']
 counter2 = 0
 for R_P0 in R_P_values:
     counter = 0
-    for S in S_values:
+    for S_init in S_values:
         x_0 = [R_P0]
-        x = odeint(odes, x_0, t, args=(S,))
+        x = odeint(odes, x_0, t, args=(S_init,))
         R_P = x[:, 0]
-        if counter < 5 and counter2 < 1:
-            plt.plot(t, R_P, label=f'$S={S}$', color=colors[counter])
+        # if counter < 5 and counter2 < 1:
+        #     plt.plot(t, R_P, label=f'$S={S_init}$', color=colors[counter])
+        # else:
+        #     plt.plot(t, R_P, color=colors[counter])
+
+        if R_P[-1] > R_P0:
+            color = 'lightskyblue'
         else:
-            plt.plot(t, R_P, color=colors[counter])
+            color = 'pink'
+        amp = 0
+        freq = 0
+        signal = S_init + amp * np.sin(freq * t)
+        plt.plot(signal, R_P, color=color)
+        plt.plot(S_init, R_P[-1], '.', color='black')
+
         counter += 1
     counter2 += 1
 
 # plt.title('$R_P(t)$ for oscillating $S$ and $R_{P0}=0.1$')
-plt.title('$R_P(t)$ for constant $S$ and different $R_{P0}$')
-plt.xlabel('$t$')
+# plt.title('$R_P(t)$ for constant $S$ and different $R_{P0}$')
+plt.title('Steady state curve for sigmoidal model')
+# plt.xlabel('$t$')
+plt.xlabel('$S$')
 plt.ylabel('$R_P$')
-plt.legend(loc='lower right')
+# plt.legend(loc='lower right')
 plt.show()
