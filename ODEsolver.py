@@ -162,25 +162,21 @@ def scaleValues(list, mult, add):
 t = np.linspace(0, 1000,700)
 
 # initial condition
-X_0  = 1
-R1_0 = 1
-init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
 
 # creating the amount of plots given earlier
 
 """
 
-"""
 if plots != 1:
-    fig,ax = plt.subplots(plots,1,figsize = (11,5))
 else:
     fig,ax = plt.subplots(figsize = (11,5))
     ax = [ax]
+"""
 """ TEMPORARY """
 # fig,ax = plt.subplots(2,1,figsize = (11,5))
 
+fig,ax = plt.subplots(2,1,figsize = (11,5))
 fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
-colors = iter(plt.cm.rainbow(np.linspace(0, 1, len(a_values))))
 
 reqAmpl = 0.9 # The amplitude of oscillatory signal we know works 
 # reqAmpl = 0.6 # The amplitude of oscillatory signal we know works 
@@ -218,43 +214,46 @@ for R0 in R_0_values:
         run_model(R0, constant_signal)
 """    
 
-for i in range(len(a_values)):
 
-    # iterate through the different a and b values to plot them
-    a = a_values[i]; b = b_values[i]; S = s_values[i]; r = r_values[i]
-    init_cond[-1]=r
-    signal = S + a*np.sin(b*t)
-    # ax[i].plot(t,signal,  color = "g")
-    
-    ''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
-    E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
-    x = odeint(odes, init_cond, t, args=(S,0,b, freq)) 
-    R_P1  = x[:, 0]
-    mult,add  = findScales(R_P1, reqAmpl, reqCon) # find scaling values
-    R_P1      = scaleValues(R_P1, mult, add)
-    # ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
-    
-    x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
-    R1    = x[:, 2]
+# iterate through the different a and b values to plot them
+X_0  = 1
+R1_0 = 1
+init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
+a = 0.2; 
+b = 0.2; 
+S = 0.2; r = 0.3
+init_cond[-1]=r
+signal = S + a*np.sin(b*t)
+# ax[i].plot(t,signal,  color = "g")
 
-    # ax[i].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "y")
-    ax[i].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+''' To extract information about R_P, so we can find out what values are needed to make is stay within the right values 
+E.g. we need to find out what to multiply the R_P signal with when used as input for dRdt'''
+x = odeint(odes, init_cond, t, args=(S,0,b, freq)) 
+R_P1  = x[:, 0]
+mult,add  = findScales(R_P1, reqAmpl, reqCon) # find scaling values
+R_P1      = scaleValues(R_P1, mult, add)
+# ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
 
-    x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
-    R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
-    X   = x[:, 1] 
-    R   = x[:, 2] # mutual inhibition with act-inhib signal
-    c = next(colors)
-    R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
-    ax[i].plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = c)
-    # ax[i].plot(t,  R, label = f"Full mutual inhibition response against time", color = "m")
-    # ax[i].plot(t,R_P, label = f"Full activator inhibitor response against ", "m") # plots the R_P, which is used as signal for dRdt
+x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
+R1    = x[:, 2]
+
+ax[1].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "y")
+ax[0].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+
+x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
+R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
+X   = x[:, 1] 
+R   = x[:, 2] # mutual inhibition with act-inhib signal
+R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
+# ax[0].plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = c)
+# ax[1].plot(t,  R, label = f"Full mutual inhibition response against time", color = "m")
+# ax[1].plot(t,R_P, label = f"Full activator inhibitor response against ", "m") # plots the R_P, which is used as signal for dRdt
 
 
 
 
-    ax[i].set(ylabel="R")
-    ax[i].set(xlabel="S")
+ax[0].set(ylabel="R")
+ax[0].set(xlabel="S")
 
 fig.legend(loc='lower right')
 
