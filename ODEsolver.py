@@ -74,6 +74,7 @@ def odes(x, t, s, a = 0, b = 1, freq = 1, mult = 1, add = 0, sig = False):
     # mutual inhibition with negative feedback (R_P) as signal
     if not sig:
         dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
+        # dRdt = dRdt*2.8
     else:
         dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
 
@@ -82,50 +83,6 @@ def odes(x, t, s, a = 0, b = 1, freq = 1, mult = 1, add = 0, sig = False):
 def goldbeter_koshland(u, v, J, K):
     G = (2 * u * K) / (v - u + v * J + u * K + np.sqrt((v - u + v * J + u * K) ** 2 - 4 * (v - u) * u * K))
     return G
-
-''' creates some interesting results. for keeping
-a_values = [0.2] # first value for amplibute to plot for
-b_values = [0.2]
-
-'''
-""" For direct oscillatory signal for act-inhib
-a_values = [0.6] # first value for amplibute to plot for
-s_values = [1.3]    # for activ-inhib
-b_values = [0.05]
-"""
-
-a_values = [0.21] # first value for amplibute to plot for
-b_values = [0.18] # 0.18 works with 0.17 on a
-
-
-a_values = [0.20] # first value for amplibute to plot for
-b_values = [0.20] # 0.18 works with 0.17 on a
-
-a_values = [0.20] # first value for amplibute to plot for
-b_values = [0.20] # 0.18 works with 0.17 on a
-
-
-s_values = [0.2]    # for activ-inhib
-r_values = [0.3]
-
-# If we want to plot more things with different inputs
-a_step = 0.01    # stepwise change of a
-b_step = 0    # stepwise change of b 
-s_step = 0    # stepwise change of signal
-r_step = 0    # stepwise change of R_0 (ish)
-
-plots = 1     # number of plots in the same window
-
-try:
-    for mul in range(plots-1):
-        mul += 1           #accumulator
-        # appending the different frequences and amplitudes
-        a_values.append(a_values[0] + a_step * mul)
-        b_values.append(b_values[0] + b_step * mul)
-        s_values.append(s_values[0] + s_step * mul)
-        r_values.append(r_values[0] + r_step * mul)
-except:
-    None
 
 # Since actual max/min may be before the system has reached steady state, we have to take a later local extrema
 def maxmin(lis):
@@ -158,34 +115,6 @@ def scaleValues(list, mult, add):
     #list = [mult*x + add for x in list]   # Making a list of the corrected act-inhib in order to plot it
     return [mult*x + add for x in list]   # Making a list of the corrected act-inhib in order to plot it
 
-
-t = np.linspace(0, 1000,700)
-
-# initial condition
-
-# creating the amount of plots given earlier
-
-"""
-
-if plots != 1:
-else:
-    fig,ax = plt.subplots(figsize = (11,5))
-    ax = [ax]
-"""
-""" TEMPORARY """
-# fig,ax = plt.subplots(2,1,figsize = (11,5))
-
-fig,ax = plt.subplots(2,1,figsize = (11,5))
-fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
-
-reqAmpl = 0.9 # The amplitude of oscillatory signal we know works 
-# reqAmpl = 0.6 # The amplitude of oscillatory signal we know works 
-reqCon  = 1.3 # the freq of the signal we know works
-# reqCon  = 1.25 # the freq of the signal we know works
-freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
-freq    =  7  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
-
-
 def run_model(R_0, signal=(0, 0, 1), color=None):
     S_init = signal[0]
     amp = signal[1]
@@ -193,36 +122,46 @@ def run_model(R_0, signal=(0, 0, 1), color=None):
     x = odeint(odesR, R_0, t, args=(S_init, amp, freq))
     R = x[:, 0]
     signal = S_init + amp * np.sin(freq * t)
-    # ax1.plot(t, signal)
     if not color:
         if R[-1] > R_0:
             color = 'lightskyblue'
         else:
             color = 'pink'
-    ax[0].plot(signal, R, color=color)
+    #ax[0].plot(signal, R, color=color)
     ax[0].plot(S_init, R[-1], '.', color='black')
-    # ax1.plot(signal, R, color=color)
-    # ax1.plot(S_init, R[-1], '.', color='black')
-    # ax2.plot(t, R, label=f'$S={round(S_init, 2)}$')
+
+t = np.linspace(0, 500,700)
+
+
+fig,ax = plt.subplots(2,1,figsize = (11,5))
+fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
+
+
 
 """
+"""    
 R_0_values = np.concatenate([np.linspace(0, 0.1, 1), np.linspace(0.1, 0.3, 20), np.linspace(0.3, 1, 2)])
 S_init_values = np.linspace(0, 2, 100)
 for R0 in R_0_values:
     for S_init in S_init_values:
         constant_signal = (S_init, 0, 0)
         run_model(R0, constant_signal)
-"""    
 
+reqAmpl = 0.6 # The amplitude of oscillatory signal we know works 
+reqCon  = 1.3 # the freq of the signal we know works
+freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
+freq    = 8  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
+a = 0.22; 
+a = 0.20; 
+b = 0.20; 
 
-# iterate through the different a and b values to plot them
+S = 0.2; 
+r = 0.3
 X_0  = 1
 R1_0 = 1
-init_cond = [R1_0,X_0, None] # R_0 is defined further up (r_values)
-a = 0.2; 
-b = 0.2; 
-S = 0.2; r = 0.3
-init_cond[-1]=r
+
+# iterate through the different a and b values to plot them
+init_cond = [R1_0,X_0, r] # R_0 is defined further up (r_values)
 signal = S + a*np.sin(b*t)
 # ax[i].plot(t,signal,  color = "g")
 
@@ -232,22 +171,23 @@ x = odeint(odes, init_cond, t, args=(S,0,b, freq))
 R_P1  = x[:, 0]
 mult,add  = findScales(R_P1, reqAmpl, reqCon) # find scaling values
 R_P1      = scaleValues(R_P1, mult, add)
-# ax[i].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
+# ax[1].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
 
 x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
 R1    = x[:, 2]
 
-ax[1].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "y")
-ax[0].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
+# ax[1].plot(t,R1, label = f"Mut-inhib + act-inhib without sinus", color = "y")
+# ax[0].plot(R_P1,R1, label = f"Mut-inhib + act-inhib without sinus", color = "m")
 
 x = odeint(odes, init_cond, t, args=(S,a,b,freq,mult,add )) # When dRdt get the right signal from R_P
 R_P = x[:, 0] # act-inhib including freq change and oscilatory signal
 X   = x[:, 1] 
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
-# ax[0].plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = c)
-# ax[1].plot(t,  R, label = f"Full mutual inhibition response against time", color = "m")
-# ax[1].plot(t,R_P, label = f"Full activator inhibitor response against ", "m") # plots the R_P, which is used as signal for dRdt
+ax[0].plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = "g")
+ax[1].plot(t,  R, label = f"Full mutual inhibition response against time", color = "m")
+# ax[1].plot(signal,  R, label = f"Full mutual inhibition response against time", color = "m")
+ax[1].plot(t,R_P, label = f"Full activator inhibitor response against ", color = "b") # plots the R_P, which is used as signal for dRdt
 
 
 
