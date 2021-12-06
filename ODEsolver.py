@@ -74,7 +74,7 @@ def odes(x, t, s, a = 0, b = 1, freq = 1, mult = 1, add = 0, sig = False):
     # mutual inhibition with negative feedback (R_P) as signal
     if not sig:
         dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
-        dRdt = dRdt*0.8
+        # dRdt = dRdt*0.8
     else:
         dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
 
