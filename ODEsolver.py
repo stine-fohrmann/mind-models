@@ -40,6 +40,11 @@ def goldbeter_koshland(u, v, J, K):
 # declare time vector
 t = np.linspace(0, 1000, 2000)
 
+steadystates1 = []
+steadystates2 = []
+S_inits1 = []
+S_inits2 = []
+
 
 def run_model(R_0, signal=(0, 0, 0), color=None):
     S_init = signal[0]
@@ -54,9 +59,18 @@ def run_model(R_0, signal=(0, 0, 0), color=None):
             color = 'lightskyblue'
         else:
             color = 'pink'
-    ax1.plot(signal, R, color=color)
-    ax1.plot(S_init, R[-1], '.', color='black')
+    # ax1.plot(signal, R, color=color)
+    # ax1.plot(S_init, R[-1], '.', color='black')
     # ax2.plot(t, R, label=f'$S={round(S_init, 2)}$')
+    # print(f'{S_init=}')
+    # print(R[-1])
+
+    if S_init < 1.8 and R[-1] < 0.2:
+        S_inits1.append(S_init)
+        steadystates1.append(R[-1])
+    elif S_init > 0.7 and R[-1] > 0.3:
+        S_inits2.append(S_init)
+        steadystates2.append(R[-1])
 
 
 fig, (ax1) = plt.subplots(1)
@@ -68,14 +82,29 @@ for R_0 in R_0_values:
         constant_signal = (S_init, 0, 0)
         run_model(R_0, constant_signal)
 
+ax1.plot(S_inits1[0:85], steadystates1[0:85], '-', color='black')
+ax1.plot(S_inits1[84], steadystates1[84], '.', color='r', label='$S_{crit, 1}$')
+i = 743+14
+j = 783+31
+ax1.plot(S_inits2[i:j], steadystates2[i:j], '-', color='black')
+ax1.plot(S_inits2[i], steadystates2[i], '.', color='b', label='$S_{crit, 2}$')
+
+for k in range(j-i):
+    print(f'{S_inits2[k+i]=}, {steadystates2[i+k]}')
+
+print(len(S_inits2))
+
 R_0 = 0
 S_init = 1.3
 amp = 0.6
 freq = 0.02
 constant_signal = (S_init, 0, 0)
 # run_model(R_0, constant_signal)
-run_model(R_0, (S_init, amp, freq), color='green')
+# run_model(R_0, (S_init, amp, freq), color='green')
 # fig.suptitle(f'R(t) for S={constant_signal[0]} and S={S_init}+{amp}sin({freq}t)')
-fig.suptitle(f'S,R-diagram for S={S_init}+{amp}sin({freq}t)')
+# fig.suptitle(f'S,R-diagram for S={S_init}+{amp}sin({freq}t)')
+ax1.set_xlabel('$S$')
+ax1.set_ylabel('$R$')
+ax1.legend()
 
 plt.show()
