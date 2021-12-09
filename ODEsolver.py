@@ -115,6 +115,9 @@ def scaleValues(list, mult, add):
     #list = [mult*x + add for x in list]   # Making a list of the corrected act-inhib in order to plot it
     return [mult*x + add for x in list]   # Making a list of the corrected act-inhib in order to plot it
 
+
+S_inits = np.linspace(0, 700,700)
+
 def run_model(R_0, signal=(0, 0, 1), color=None):
     S_init = signal[0]
     amp = signal[1]
@@ -139,10 +142,38 @@ def removeItems(nparray, amount):
         lis.pop(0)
     return lis
 
-t = np.linspace(0, 1000,700)
+
+def plots(axis,axisType,xval,yval,startVal,xlabel):
+    start = startVal
+    crit1R = 0.308; crit1S = 0.7; crit1col = "g"
+    crit2R = 0.160; crit2S = 1.7; crit2col = "m"
+    critlineX = [xval[start],len(xval)+xval[start]]
+    critlineX = [xval[start],len(xval)]
+    xvalues = removeItems(xval,start)
+    yvalues = removeItems(yval,start)
+
+    axis.set_xlabel(xlabel)
+    axis.set_ylabel("$R_{1f}$")
+    axis.plot(xvalues,yvalues, color = "orange")
+    if axisType == "top":
+        axis.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
+        axis.plot(crit2S,crit2R, "x", ms = 15, color = crit2col)
+    if axisType == "bot":
+        axis.plot(critlineX,[crit1R,crit1R], color = crit1col)
+        axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
+    pass
 
 
-fig,ax = plt.subplots(2,1,figsize = (9,5), sharex = False)
+
+
+
+# ------------------- ACTUAL CODE ---------------------
+t = np.linspace(0, 700,700)
+
+
+# fig,ax = plt.subplots(2,1,figsize = (9,5), sharex = False)
+fig,ax   = plt.subplots(2,1, sharex = False); pd1 = ax[0]; pd2 = ax[1]
+fig2,ax2 = plt.subplots(2,1, sharex = False); p1  = ax2[0]; p2 = ax2[1]
 # fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 
 
@@ -198,36 +229,20 @@ R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in
 
 
 
-start = 200
-crit1R = 0.308; crit1S = 0.7; crit1col = "g"
-crit2R = 0.160; crit2S = 1.7; crit2col = "m"
+start = 300
 
-critlineX = [t[start],len(t)+t[start]]
-"""Only plot after the system is stable
-"""
-R_P = removeItems(R_P,start)
-R   = removeItems(R,  start)
-t   = removeItems(t,  start)
 
-p1 = ax[0]
-p1.plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = "orange")
-p1.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
-p1.plot(crit2S,crit2R, "x", ms = 15, color = crit2col)
-
-p2 = ax[1]
-p2.plot(t,  R, label = f"Full mutual inhibition response against time", color = "orange")
-p2.plot(critlineX,[crit1R,crit1R], color = crit1col)
-p2.plot(critlineX,[crit2R,crit2R], color = crit2col)
-# ax[1].plot(t,R_P, label = f"Full activator inhibitor response against ", color = "b") # plots the R_P, which is used as signal for dRdt
-# ax[1].plot(signal,  R, label = f"Full mutual inhibition response against time", color = "m")
+plots(pd1,"top",R_P,R,start,"Signal")
+plots(pd2,"bot",t,  R,start,"Time")
+plots(p1, "top",R_P1,R1,start,"Signal")
+plots(p2, "bot",t,  R1,start,"Time")
 
 
 
 
-ax[0].set(ylabel="R")
-ax[0].set(xlabel="S")
 
-fig.legend(loc='lower right')
+fig.tight_layout()
+#fig.legend(loc='lower right')
 
 
 
