@@ -130,30 +130,38 @@ def run_model(R_0, signal=(0, 0, 1), color=None):
     #ax[0].plot(signal, R, color=color)
     ax[0].plot(S_init, R[-1], '.', color='black')
 
+def removeItems(nparray, amount):
+    if type(nparray) != list:
+        lis = nparray.tolist()
+    else:
+        lis = nparray
+    for element in range(amount):
+        lis.pop(0)
+    return lis
+
 t = np.linspace(0, 1000,700)
 
 
-fig,ax = plt.subplots(2,1,figsize = (9,5))
-fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
+fig,ax = plt.subplots(2,1,figsize = (9,5), sharex = False)
+# fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 
 
 
-"""
+"""    
 R_0_values = np.concatenate([np.linspace(0, 0.1, 1), np.linspace(0.1, 0.3, 20), np.linspace(0.3, 1, 2)])
 S_init_values = np.linspace(0, 2, 100)
 for R0 in R_0_values:
     for S_init in S_init_values:
         constant_signal = (S_init, 0, 0)
         run_model(R0, constant_signal)
+"""
 
-"""    
 reqAmpl = 0.65 # The amplitude of oscillatory signal we know works 
 reqCon  = 1.2 # the freq of the signal we know works
 freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 freq    = 7.8  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
 a = 0.31; 
-b = 0.216; 
 b = 0.212; 
 
 S = 0.2; 
@@ -186,23 +194,30 @@ X   = x[:, 1]
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
 
-def removeItems(nparray, amount):
-    if type(nparray) != list:
-        lis = nparray.tolist()
-    else:
-        lis = nparray
-    for element in range(amount):
-        lis.pop(0)
-    return lis
 
+
+
+
+start = 200
+crit1R = 0.308; crit1S = 0.7; crit1col = "g"
+crit2R = 0.160; crit2S = 1.7; crit2col = "m"
+
+critlineX = [t[start],len(t)+t[start]]
 """Only plot after the system is stable
 """
-R_P = removeItems(R_P,200)
-R   = removeItems(R,200)
-t   = removeItems(t,200)
+R_P = removeItems(R_P,start)
+R   = removeItems(R,  start)
+t   = removeItems(t,  start)
 
-ax[0].plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = "g")
-ax[1].plot(t,  R, label = f"Full mutual inhibition response against time", color = "m")
+p1 = ax[0]
+p1.plot(R_P,R, label = f"Phaseplane: Mut-inhib + act-inhib WITH sinus", color = "orange")
+p1.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
+p1.plot(crit2S,crit2R, "x", ms = 15, color = crit2col)
+
+p2 = ax[1]
+p2.plot(t,  R, label = f"Full mutual inhibition response against time", color = "orange")
+p2.plot(critlineX,[crit1R,crit1R], color = crit1col)
+p2.plot(critlineX,[crit2R,crit2R], color = crit2col)
 # ax[1].plot(t,R_P, label = f"Full activator inhibitor response against ", color = "b") # plots the R_P, which is used as signal for dRdt
 # ax[1].plot(signal,  R, label = f"Full mutual inhibition response against time", color = "m")
 
