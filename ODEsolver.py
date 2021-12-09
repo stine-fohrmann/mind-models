@@ -116,7 +116,6 @@ def scaleValues(list, mult, add):
     return [mult*x + add for x in list]   # Making a list of the corrected act-inhib in order to plot it
 
 
-S_inits = np.linspace(0, 700,700)
 
 def run_model(R_0, signal=(0, 0, 1), color=None):
     S_init = signal[0]
@@ -131,6 +130,16 @@ def run_model(R_0, signal=(0, 0, 1), color=None):
         else:
             color = 'pink'
     #ax[0].plot(signal, R, color=color)
+    ax[0].plot(S_init, R[-1], '.', color='black')
+
+#S_inits = np.linspace(0, 2,0.1)
+
+def getSteadyState(R_0=0, color=None):
+    S_init = 0
+    freq = 1
+    x = odeint(odesR, R_0, t, args=(S_init, 0, freq))
+    R = x[:, 0]
+    #signal = S_init + amp * np.sin(freq * t)
     ax[0].plot(S_init, R[-1], '.', color='black')
 
 def removeItems(nparray, amount):
@@ -232,10 +241,10 @@ R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in
 start = 300
 
 
-plots(pd1,"top",R_P,R,start,"Signal")
-plots(pd2,"bot",t,  R,start,"Time")
+plots(pd1,"top",R_P,R,  start,"Signal")
+plots(pd2,"bot",t,  R,  start,"Time")
 plots(p1, "top",R_P1,R1,start,"Signal")
-plots(p2, "bot",t,  R1,start,"Time")
+plots(p2, "bot",t,  R1, start,"Time")
 
 
 
