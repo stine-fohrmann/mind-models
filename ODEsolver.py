@@ -132,15 +132,36 @@ def run_model(R_0, signal=(0, 0, 1), color=None):
     #ax[0].plot(signal, R, color=color)
     ax[0].plot(S_init, R[-1], '.', color='black')
 
-#S_inits = np.linspace(0, 2,0.1)
 
-def getSteadyState(R_0=0, color=None):
+def getSteadyState(s,state="lower",R_0=0):
     S_init = 0
     freq = 1
-    x = odeint(odesR, R_0, t, args=(S_init, 0, freq))
-    R = x[:, 0]
+    R_lower = []
+    S_lower = []
+    R_upper = []
+    S_upper = []
+    r_inits = [0,1]
+    t = np.linspace(0, 200,100)
+    for r in r_inits:
+        for i in range(len(s)):
+            x = odeint(odesR, r, t, args=(s[i], 0, freq))
+            R = x[:, 0]
+            R_asympt = R[-1]
+            # if state == "lower":
+            if R_asympt < 0.25 and r == 0:
+                R_lower.append(R_asympt)
+                S_lower.append(s[i])
+            # if state == "lower":
+            if R_asympt > 0.25 and r == 1:
+                R_upper.append(R_asympt)
+                S_upper.append(s[i])
+    return [S_lower,R_lower],[S_upper,R_upper]
     #signal = S_init + amp * np.sin(freq * t)
-    ax[0].plot(S_init, R[-1], '.', color='black')
+    #ax[0].plot(S_init, R[-1], '.', color='black')
+
+S_inits = np.linspace(0, 2, 700)
+[S_lower, R_lower],[S_upper, R_upper] = getSteadyState(S_inits)
+crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]]]
 
 def removeItems(nparray, amount):
     if type(nparray) != list:
@@ -152,10 +173,14 @@ def removeItems(nparray, amount):
     return lis
 
 
-def plots(axis,axisType,xval,yval,startVal,xlabel):
+def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     start = startVal
-    crit1R = 0.308; crit1S = 0.7; crit1col = "g"
-    crit2R = 0.160; crit2S = 1.7; crit2col = "m"
+
+    # crit1R = 0.308; crit1S = 0.7; crit1col = "g"
+    # crit2R = 0.160; crit2S = 1.7; crit2col = "m"
+    crit1R = crits[1][1]; 
+    crit1S = crits[1][0]; crit1col = "g"
+    crit2R = crits[0][1]; crit2S = crits[0][0]; crit2col = "m"
     critlineX = [xval[start],len(xval)+xval[start]]
     critlineX = [xval[start],len(xval)]
     xvalues = removeItems(xval,start)
@@ -180,7 +205,6 @@ def plots(axis,axisType,xval,yval,startVal,xlabel):
 t = np.linspace(0, 700,700)
 
 
-# fig,ax = plt.subplots(2,1,figsize = (9,5), sharex = False)
 fig,ax   = plt.subplots(2,1, sharex = False); pd1 = ax[0]; pd2 = ax[1]
 fig2,ax2 = plt.subplots(2,1, sharex = False); p1  = ax2[0]; p2 = ax2[1]
 # fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
@@ -241,12 +265,13 @@ R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in
 start = 300
 
 
-plots(pd1,"top",R_P,R,  start,"Signal")
-plots(pd2,"bot",t,  R,  start,"Time")
-plots(p1, "top",R_P1,R1,start,"Signal")
-plots(p2, "bot",t,  R1, start,"Time")
+plots(pd1,"top",R_P,R,  start,"Signal",crits)
+plots(pd2,"bot",t,  R,  start,"Time",crits)
+plots(p1, "top",R_P1,R1,start,"Signal",crits)
+plots(p2, "bot",t,  R1, start,"Time",crits)
 
-
+pd1.plot(S_lower,R_lower, color = "m")
+pd1.plot(S_upper,R_upper, color = "g")
 
 
 
