@@ -223,7 +223,7 @@ for R0 in R_0_values:
 reqAmpl = 0.65 # The amplitude of oscillatory signal we know works 
 reqCon  = 1.2 # the freq of the signal we know works
 freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
-freq    = 7.8  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
+freq    = 7.83  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
 a = 0.31; 
 b = 0.212; 
