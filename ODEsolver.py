@@ -159,9 +159,42 @@ def getSteadyState(s,state="lower",R_0=0):
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
 
+def getSteadyState2(s,R):
+    S_init = 0
+    freq = 1
+    R_lower = []
+    S_lower = []
+    R_upper = []
+    S_upper = []
+    R_tweak = []
+    r_inits = [0,1]
+    t = np.linspace(0, 1000,1000)
+    for r in r_inits:
+        for i in range(len(R)):
+            x = odeint(odesR, r, t, args=(s[i], 0, freq))
+            R = x[:, 0]
+            R_asympt = R[-1]
+            # if state == "lower":
+            if R_asympt < 0.25 and r == 0:
+                R_lower.append(R_asympt)
+                S_lower.append(s[i])
+            # if state == "lower":
+            if R_asympt > 0.25 and r == 1:
+                R_upper.append(R_asympt)
+                S_upper.append(s[i])
+            R_tweak.append(R_asympt-R[i])
+    return 1,2,3,4,5
+    return [S_lower,R_lower,S_upper,R_upper,R_tweak]
+    #signal = S_init + amp * np.sin(freq * t)
+    #ax[0].plot(S_init, R[-1], '.', color='black')
+R_tweak = 2
 S_inits = np.linspace(0, 2, 700)
-[S_lower, R_lower],[S_upper, R_upper] = getSteadyState(S_inits)
+something = getSteadyState(S_inits)
+print(something[0])
+S_lower, R_lower,S_upper, R_upper,R_tweak = getSteadyState(S_inits)
 crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]]]
+
+
 
 def removeItems(nparray, amount):
     if type(nparray) != list:
@@ -181,7 +214,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     crit1R = crits[1][1]; 
     crit1S = crits[1][0]; crit1col = "g"
     crit2R = crits[0][1]; crit2S = crits[0][0]; crit2col = "m"
-    critlineX = [xval[start],len(xval)+xval[start]]
+    # critlineX = [xval[start],len(xval)+xval[start]]
     critlineX = [xval[start],len(xval)]
     xvalues = removeItems(xval,start)
     yvalues = removeItems(yval,start)
@@ -193,7 +226,13 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
         axis.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
         axis.plot(crit2S,crit2R, "x", ms = 15, color = crit2col)
     if axisType == "bot":
-        axis.plot(critlineX,[crit1R,crit1R], color = crit1col)
+        uR = [0.29, 0.373]
+        lR = [0.127,0.168]
+        # axis.plot(critlineX,[uR[0],uR[0]], color = crit1col)
+        # axis.plot(critlineX,[uR[1],uR[1]], color = crit1col)
+        # axis.plot(critlineX,[lR[0],lR[0]], color = crit1col)
+        # axis.plot(critlineX,[lR[1],lR[1]], color = crit1col)
+        axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
         axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
     pass
 
@@ -201,14 +240,20 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 
+
+
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0, 700,700)
+t = np.linspace(0, 1000,1000)
 
 
-fig,ax   = plt.subplots(2,1, sharex = False); pd1 = ax[0]; pd2 = ax[1]
+fig,ax   = plt.subplots(1,2, sharex = False, sharey=True); pd1 = ax[0]; pd2 = ax[1]
+pd1.set_ylim(0,0.8)
 fig2,ax2 = plt.subplots(2,1, sharex = False); p1  = ax2[0]; p2 = ax2[1]
 # fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
+upperLoopX = 0.526; upperLoopY = 0.327
+lowerLoopX = 1.752; lowerLoopY = 0.145
 
+# crits = [[upperLoopX,upperLoopY],[lowerLoopX,lowerLoopY]]
 
 
 """    
@@ -226,7 +271,9 @@ freq    = 7.4   # divide the R_P with some number, which will change frequencies
 freq    = 7.83  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
 a = 0.31; 
+a = 0.39; 
 b = 0.212; 
+b = 0.38; 
 
 S = 0.2; 
 r = 0.3
@@ -258,8 +305,10 @@ X   = x[:, 1]
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
 
+        
 
-
+upperRange = [0.29,0.373]
+lowerRange = [0.127,0.168]
 
 
 start = 300
@@ -267,13 +316,15 @@ start = 300
 
 plots(pd1,"top",R_P,R,  start,"Signal",crits)
 plots(pd2,"bot",t,  R,  start,"Time",crits)
+# plots(pd2,"bot",t,  R_tweak,  start,"Time",crits)
 plots(p1, "top",R_P1,R1,start,"Signal",crits)
 plots(p2, "bot",t,  R1, start,"Time",crits)
 
 pd1.plot(S_lower,R_lower, color = "m")
 pd1.plot(S_upper,R_upper, color = "g")
 
-
+# pd1.plot(upperLoopX,upperLoopY,"*", ms = 5, c = "m")
+# pd1.plot(lowerLoopX,lowerLoopY,"*", ms = 5, c = "m")
 
 fig.tight_layout()
 #fig.legend(loc='lower right')
