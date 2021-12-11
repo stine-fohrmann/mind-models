@@ -159,7 +159,7 @@ def getSteadyState(s,state="lower",R_0=0):
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
 
-def getSteadyState2(s,R):
+def getSteadyState2(s,Q):
     S_init = 0
     freq = 1
     R_lower = []
@@ -170,7 +170,7 @@ def getSteadyState2(s,R):
     r_inits = [0,1]
     t = np.linspace(0, 1000,1000)
     for r in r_inits:
-        for i in range(len(R)):
+        for i in range(len(Q)):
             x = odeint(odesR, r, t, args=(s[i], 0, freq))
             R = x[:, 0]
             R_asympt = R[-1]
@@ -182,17 +182,14 @@ def getSteadyState2(s,R):
             if R_asympt > 0.25 and r == 1:
                 R_upper.append(R_asympt)
                 S_upper.append(s[i])
-            R_tweak.append(R_asympt-R[i])
-    return 1,2,3,4,5
+            R_tweak.append(R_asympt-Q[i])
+    print(len(R_tweak))
     return [S_lower,R_lower,S_upper,R_upper,R_tweak]
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
 R_tweak = 2
-S_inits = np.linspace(0, 2, 700)
-something = getSteadyState(S_inits)
-print(something[0])
-S_lower, R_lower,S_upper, R_upper,R_tweak = getSteadyState(S_inits)
-crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]]]
+S_inits = np.linspace(0, 2, 1000)
+
 
 
 
@@ -218,9 +215,11 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     critlineX = [xval[start],len(xval)]
     xvalues = removeItems(xval,start)
     yvalues = removeItems(yval,start)
-
-    axis.set_xlabel(xlabel)
-    axis.set_ylabel("$R_{1f}$")
+    fs = 13
+    axis.set_xlabel(xlabel,fontsize = fs)
+    axis.set_ylabel("$R_{1f}$", fontsize  =fs)
+    for label in (axis.get_xticklabels() + axis.get_yticklabels()):
+        label.set_fontsize(fs)
     axis.plot(xvalues,yvalues, color = "orange")
     if axisType == "top":
         axis.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
@@ -232,8 +231,8 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
         # axis.plot(critlineX,[uR[1],uR[1]], color = crit1col)
         # axis.plot(critlineX,[lR[0],lR[0]], color = crit1col)
         # axis.plot(critlineX,[lR[1],lR[1]], color = crit1col)
-        axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
-        axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
+        # axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
+        # axis.plot(critlineX,[crit2R,crit2R], color = crit2col)
     pass
 
 
@@ -243,12 +242,25 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0, 1000,1000)
+t = np.linspace(0, 700,1000)
 
 
-fig,ax   = plt.subplots(1,2, sharex = False, sharey=True); pd1 = ax[0]; pd2 = ax[1]
-pd1.set_ylim(0,0.8)
-fig2,ax2 = plt.subplots(2,1, sharex = False); p1  = ax2[0]; p2 = ax2[1]
+# fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
+fig1,pd1   = plt.subplots();
+fig2,pd2   = plt.subplots();
+fig3,p1   = plt.subplots();
+fig4,p2   = plt.subplots();
+plot = [pd1,pd2,p1,p2]
+figs = [fig1,fig2,fig3,fig4]
+for f,p in zip(figs,plot):
+    p.set_ylim(0,0.7)
+    # f.tight_layout()
+    f.set_figheight(4)
+    f.set_figwidth(6)
+# pd1.set_ylim(0,0.7)
+# fig2,ax2 = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); p1  = ax2[0]; p2 = ax2[1]
+
+# p1.set_ylim(0,0.7)
 # fig.suptitle("Response from mutual inhibition when \"negative feedback oscillator\" is the signal: for different freq and ampl")
 upperLoopX = 0.526; upperLoopY = 0.327
 lowerLoopX = 1.752; lowerLoopY = 0.145
@@ -270,10 +282,11 @@ reqCon  = 1.2 # the freq of the signal we know works
 freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 freq    = 7.83  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
-a = 0.31; 
 a = 0.39; 
-b = 0.212; 
 b = 0.38; 
+
+a = 0.31; 
+b = 0.212; 
 
 S = 0.2; 
 r = 0.3
@@ -305,13 +318,14 @@ X   = x[:, 1]
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
 
-        
+S_lower, R_lower,S_upper, R_upper, R_tweak = getSteadyState2(S_inits, R)
+crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]]]        
 
 upperRange = [0.29,0.373]
 lowerRange = [0.127,0.168]
 
 
-start = 300
+start = 500
 
 
 plots(pd1,"top",R_P,R,  start,"Signal",crits)
@@ -322,13 +336,21 @@ plots(p2, "bot",t,  R1, start,"Time",crits)
 
 pd1.plot(S_lower,R_lower, color = "m")
 pd1.plot(S_upper,R_upper, color = "g")
+p1.plot(S_lower,R_lower, color = "m")
+p1.plot(S_upper,R_upper, color = "g")
 
 # pd1.plot(upperLoopX,upperLoopY,"*", ms = 5, c = "m")
 # pd1.plot(lowerLoopX,lowerLoopY,"*", ms = 5, c = "m")
 
-fig.tight_layout()
+# fig.tight_layout()
+# fig2.tight_layout()
 #fig.legend(loc='lower right')
 
-
-
-plt.show()
+fignames = ["with sine R-S","with sine R-T","without sine R-S","without sine R-T"]
+fignames = ["with sine R-S","with sine R-T","without sine R-S","without sine R-T"]
+c=0
+for f in figs:
+    f.tight_layout()
+    f.savefig(f"1f2b " + fignames[c])
+    c+=1
+# plt.show()
