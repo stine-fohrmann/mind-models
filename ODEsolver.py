@@ -362,7 +362,9 @@ for f in figs:
     #f.tight_layout()
     f.tight_layout(rect=[0, 0, 1, 0.97])
     # f.suptitle(figtitles[c])
-    f.suptitle(title + "\n")
+    if c > 1:
+        title = f"Input signal: {S}"
+    f.suptitle(title)
     f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
 plt.gcf().subplots_adjust(top=0.15)
