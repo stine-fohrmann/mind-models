@@ -367,5 +367,4 @@ for f in figs:
     f.suptitle(title)
     f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
-plt.gcf().subplots_adjust(top=0.15)
 # plt.show()
