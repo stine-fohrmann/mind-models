@@ -183,7 +183,6 @@ def getSteadyState2(s,Q):
                 R_upper.append(R_asympt)
                 S_upper.append(s[i])
             R_tweak.append(R_asympt-Q[i])
-    print(len(R_tweak))
     return [S_lower,R_lower,S_upper,R_upper,R_tweak]
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
@@ -242,7 +241,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0, 700,1000)
+t = np.linspace(0, 1200,1000)
 
 
 # fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
@@ -253,7 +252,7 @@ fig4,p2   = plt.subplots();
 plot = [pd1,pd2,p1,p2]
 figs = [fig1,fig2,fig3,fig4]
 for f,p in zip(figs,plot):
-    p.set_ylim(0,0.7)
+    p.set_ylim(0,1)
     # f.tight_layout()
     f.set_figheight(4)
     f.set_figwidth(6)
@@ -282,11 +281,18 @@ reqCon  = 1.2 # the freq of the signal we know works
 freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 freq    = 7.83  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
-a = 0.39; 
-b = 0.38; 
 
 a = 0.31; 
-b = 0.212; 
+b = 0.212
+
+
+# a = 0.39; 
+# a = 0.45; 
+# a = 0.70; 
+# b = 0.16; 
+# b = 0.30; 
+# b = 0.40; 
+# b = 0.25; 
 
 S = 0.2; 
 r = 0.3
@@ -325,7 +331,7 @@ upperRange = [0.29,0.373]
 lowerRange = [0.127,0.168]
 
 
-start = 500
+start = 300
 
 
 plots(pd1,"top",R_P,R,  start,"Signal",crits)
@@ -345,12 +351,19 @@ p1.plot(S_upper,R_upper, color = "g")
 # fig.tight_layout()
 # fig2.tight_layout()
 #fig.legend(loc='lower right')
-
+fignames = ["sine R-S chaos","sine R-T chaos","R-S chaotic","R-T chaotic"]
+fignames = [f"a{a}b{b}- RS",f"a{a}b{b}- RT","delete","delete"]
 fignames = ["with sine R-S","with sine R-T","without sine R-S","without sine R-T"]
-fignames = ["with sine R-S","with sine R-T","without sine R-S","without sine R-T"]
+figtitles = [f"Input signal: {S} + {a}sin({b}t) ","sine R-T chaos","R-S chaotic","R-T chaotic"]
 c=0
+title = f"Input signal: {S} + {a}sin({b}t) "
+savename = fr"{S} + {a}sin({b}t) "
 for f in figs:
-    f.tight_layout()
-    f.savefig(f"1f2b " + fignames[c])
+    #f.tight_layout()
+    f.tight_layout(rect=[0, 0, 1, 0.97])
+    # f.suptitle(figtitles[c])
+    f.suptitle(title + "\n")
+    f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
+plt.gcf().subplots_adjust(top=0.15)
 # plt.show()
