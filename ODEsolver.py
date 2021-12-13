@@ -37,7 +37,7 @@ S_values = np.linspace(0, 3, 100)
 # R_P_values = [0.1]
 # R_P_values = np.linspace(0, 1, 2)
 R_P_values = np.linspace(0, 1, 10)
-amps = [1]
+amps = [0]
 # amps = np.linspace(0, 2, 5)
 # freq = 0.1
 # freqs = np.linspace(0, 1, 5)
@@ -60,16 +60,17 @@ for freq in freqs:
                 #     plt.plot(t, R_P, label=f'$S={S_init}$', color=colors[counter])
                 # else:
                 #     plt.plot(t, R_P, color=colors[counter])
-
-                # if R_P[-1] > R_P0:
-                #     color = 'lightskyblue'
-                # else:
-                #     color = 'pink'
+                R_P = R_P_const
+                if R_P[-1] > R_P0:
+                    color = 'lightskyblue'
+                else:
+                    color = 'pink'
                 amp = 0
                 freq = 0
                 signal = S_init + amp * np.sin(freq * t)
-                # plt.plot(signal, R_P)#, color=color)
-                # plt.plot(t, R_P, label=f'$S_0 ={S_init} $', color=colors[counter])
+                plt.plot(signal, R_P, color=color)
+                # plt.plot(t, signal)
+                # plt.plot(t, R_P, label=f'$S_0 ={S_init} $')#, color=colors[counter])
                 # plt.plot(t, R_P, label=f'$a ={amp} $')
                 # plt.plot(t, R_P, label=f'$f ={freq} $')
                 # plt.plot(t, R_P_const, '--', color=colors[counter])
