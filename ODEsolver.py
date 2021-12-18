@@ -65,18 +65,14 @@ def odes(x, t, s, a = 0, b = 1, freq = 1, mult = 1, add = 0, sig = False):
     def E(R):
         return goldbeter_koshland(K_3, K_4 * R, J_3, J_4)
 
+
     # activator inhibitor
     dR1dt = k_0*E1(R1) + k_1*S - k_2 * R1 -k_2prime * X * R1 
     dR1dt = dR1dt/freq # an attempt to manipulate the frequency of the oscillations
     dXdt  = k_5*R1     - k_6*X
-    #dXdt  = dXdt *2
 
-    # mutual inhibition with negative feedback (R_P) as signal
-    if not sig:
-        dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
-        # dRdt = dRdt*0.8
-    else:
-        dRdt   = K_0 + K_1 * S - K_2 * R - K_2prime * E(R) * R
+    # mutual inhibition with negative feedback (R1) as signal
+    dRdt   = K_0 + K_1 * (mult*R1+add) - K_2 * R - K_2prime * E(R) * R
 
     return [dR1dt, dXdt, dRdt]
 
@@ -216,13 +212,13 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     yvalues = removeItems(yval,start)
     fs = 13
     axis.set_xlabel(xlabel,fontsize = fs)
-    axis.set_ylabel("$R_{1f}$", fontsize  =fs)
+    axis.set_ylabel("$R_{IN}$", fontsize  =fs)
     for label in (axis.get_xticklabels() + axis.get_yticklabels()):
         label.set_fontsize(fs)
     axis.plot(xvalues,yvalues, color = "orange")
     if axisType == "top":
-        axis.plot(crit1S,crit1R,"x", ms = 15, color = crit1col)
-        axis.plot(crit2S,crit2R, "x", ms = 15, color = crit2col)
+        axis.plot(crit1S,crit1R,"x", ms = 8, color = crit1col)
+        axis.plot(crit2S,crit2R, "x", ms =8, color = crit2col)
     if axisType == "bot":
         uR = [0.29, 0.373]
         lR = [0.127,0.168]
@@ -241,7 +237,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0, 1200,1000)
+t = np.linspace(0, 800,1000)
 
 
 # fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
@@ -280,6 +276,7 @@ reqAmpl = 0.65 # The amplitude of oscillatory signal we know works
 reqCon  = 1.2 # the freq of the signal we know works
 freq    = 7.4   # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 freq    = 7.83  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
+freq    = 7.8  # divide the R_P with some number, which will change frequencies, 8 works when there is no oscillatory signal in the activator inhibitor
 a = 0.22; 
 
 a = 0.31; 
@@ -311,6 +308,7 @@ R_P1  = x[:, 0]
 mult,add  = findScales(R_P1, reqAmpl, reqCon) # find scaling values
 R_P1      = scaleValues(R_P1, mult, add)
 # ax[1].plot(t,R_P1, label = f"a = {round(a,3)}, b = {round(b,3)}", color = "g") # plots the R_P, which is used as signal for dRdt
+print(f'mult: {mult*0.05}, add: {add*0.05}')
 
 x = odeint(odes, init_cond, t, args=(S,0,b,freq,mult,add )) # When dRdt get the right signal from R_P
 R1    = x[:, 2]
@@ -331,14 +329,15 @@ upperRange = [0.29,0.373]
 lowerRange = [0.127,0.168]
 
 
-start = 300
+start = 370
 
+signalname = "$R_{AI}$"
 
-plots(pd1,"top",R_P,R,  start,"Signal",crits)
-plots(pd2,"bot",t,  R,  start,"Time",crits)
+plots(pd1,"top",R_P,R,  start,signalname,crits)
+plots(pd2,"bot",t,  R,  start,"t",crits)
 # plots(pd2,"bot",t,  R_tweak,  start,"Time",crits)
-plots(p1, "top",R_P1,R1,start,"Signal",crits)
-plots(p2, "bot",t,  R1, start,"Time",crits)
+plots(p1, "top",R_P1,R1,start,signalname,crits)
+plots(p2, "bot",t,  R1, start,"t",crits)
 
 pd1.plot(S_lower,R_lower, color = "m")
 pd1.plot(S_upper,R_upper, color = "g")
@@ -356,14 +355,14 @@ fignames = [f"a{a}b{b}- RS",f"a{a}b{b}- RT","delete","delete"]
 fignames = ["with sine R-S","with sine R-T","without sine R-S","without sine R-T"]
 figtitles = [f"Input signal: {S} + {a}sin({b}t) ","sine R-T chaos","R-S chaotic","R-T chaotic"]
 c=0
-title = f"Input signal: {S} + {a}sin({b}t) "
+title = f"Input signal $S$: {S} + {a}sin({b}t) "
 savename = fr"{S} + {a}sin({b}t) "
 for f in figs:
     #f.tight_layout()
     f.tight_layout(rect=[0, 0, 1, 0.97])
     # f.suptitle(figtitles[c])
     if c > 1:
-        title = f"Input signal: {S}"
+        title = f"Input signal $S$: {S}"
     f.suptitle(title)
     f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
