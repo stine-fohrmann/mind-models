@@ -1,4 +1,5 @@
 # dependencies
+from hashlib import pbkdf2_hmac
 from scipy.integrate import odeint
 import numpy as np
 import matplotlib.pyplot as plt
@@ -244,7 +245,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0, 800,1000)
+t = np.linspace(0,150,1000)
 
 
 # fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
@@ -333,8 +334,13 @@ X   = x[:, 1]
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
 
+
+
 S_lower, R_lower,S_upper, R_upper, R_tweak,lowerFirst,upperLast = getSteadyState2(S_inits, R)
-crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]],lowerFirst]        
+crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]],lowerFirst]    
+lowerCrit = [S_lower[-1], R_lower[-1]]
+upperCrit = [S_upper[0], R_upper[0]]
+
 # y=R_lower[-1]-lowerFirst[0]
 # x=S_lower[-1]-lowerFirst[1]
 # m_lower=y/x
@@ -347,8 +353,28 @@ crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]],lowerFirst]
 # print([S_upper[0],R_upper[0]])
 # print(m_upper)
 
-lower_slope = 0.0998
-upper_slope = 0.5699
+m_lower = 0.0998
+m_upper = 0.5699
+
+b_upper = -m_upper*upperLast[0]+upperLast[1]
+b_lower = -m_lower*lowerFirst[0]+lowerFirst[1]
+b_lower = 0
+print(b_upper)
+print(b_lower)
+
+distArray = []
+
+for i in range(len(R_P)):
+    R1=m_lower*R_P[i]+b_lower
+    R2=m_upper*R_P[i]+b_upper
+    R1_diff=R1-R[i]
+    R2_diff=R2-R[i]
+    smallerOne = min(abs(R1_diff),abs(R2_diff))
+    if abs(R1_diff) > abs(R2_diff):
+        smallerOne += 0.3
+    distArray.append(smallerOne)
+
+pd2.plot(t,distArray,"m")
 
 # print(y)
 
@@ -362,7 +388,7 @@ start = 370
 signalname = "$R_{AI}$"
 
 plots(pd1,"top",R_P,R,  start,signalname,crits)
-plots(pd2,"bot",t,  R,  start,"t",crits)
+# plots(pd2,"bot",t,  R,  start,"t",crits)
 # plots(pd2,"bot",t,  R_tweak,  start,"Time",crits)
 # plots(p1, "top",R_P1,R1,start,signalname,crits)
 # plots(p2, "bot",t,  R1, start,"t",crits)
@@ -395,4 +421,4 @@ for f in figs:
     f.suptitle(title)
     #f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
-# plt.show()
+plt.show()
