@@ -281,6 +281,8 @@ a = 0.22;
 
 a = 0.31; 
 b = 0.212
+a = 0.45; 
+b = 0.4
 
 
 # a = 0.39; 
@@ -364,6 +366,6 @@ for f in figs:
     if c > 1:
         title = f"Input signal $S$: {S}"
     f.suptitle(title)
-    f.savefig(f"1f2b " + fignames[c] + ".png")
+    #f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
-# plt.show()
+plt.show()
