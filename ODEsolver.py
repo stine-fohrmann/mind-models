@@ -151,7 +151,9 @@ def getSteadyState(s,state="lower",R_0=0):
             if R_asympt > 0.25 and r == 1:
                 R_upper.append(R_asympt)
                 S_upper.append(s[i])
-    return [S_lower,R_lower],[S_upper,R_upper]
+    upperLast = S_upper[-1], R_upper[-1]
+    lowerFirst = S_lower[-1], R_lower[-1]
+    return [lowerFirst],[S_lower,R_lower],[S_upper,R_upper],[upperLast]
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
 
@@ -179,7 +181,10 @@ def getSteadyState2(s,Q):
                 R_upper.append(R_asympt)
                 S_upper.append(s[i])
             R_tweak.append(R_asympt-Q[i])
-    return [S_lower,R_lower,S_upper,R_upper,R_tweak]
+    upperLast = S_upper[-2], R_upper[-2]
+    
+    lowerFirst = S_lower[1], R_lower[1]
+    return [S_lower,R_lower,S_upper,R_upper,R_tweak,lowerFirst,upperLast]
     #signal = S_init + amp * np.sin(freq * t)
     #ax[0].plot(S_init, R[-1], '.', color='black')
 R_tweak = 2
@@ -206,6 +211,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     crit1R = crits[1][1]; 
     crit1S = crits[1][0]; crit1col = "g"
     crit2R = crits[0][1]; crit2S = crits[0][0]; crit2col = "m"
+    crit3R = crits[2][1]; crit3S = crits[2][0]; crit3col = "c"
     # critlineX = [xval[start],len(xval)+xval[start]]
     critlineX = [xval[start],len(xval)]
     xvalues = removeItems(xval,start)
@@ -219,6 +225,7 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
     if axisType == "top":
         axis.plot(crit1S,crit1R,"x", ms = 8, color = crit1col)
         axis.plot(crit2S,crit2R, "x", ms =8, color = crit2col)
+        # axis.plot(crit3S,crit3R, "x", ms =8, color = crit3col)
     if axisType == "bot":
         uR = [0.29, 0.373]
         lR = [0.127,0.168]
@@ -243,10 +250,12 @@ t = np.linspace(0, 800,1000)
 # fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
 fig1,pd1   = plt.subplots();
 fig2,pd2   = plt.subplots();
-fig3,p1   = plt.subplots();
-fig4,p2   = plt.subplots();
-plot = [pd1,pd2,p1,p2]
-figs = [fig1,fig2,fig3,fig4]
+# fig3,p1   = plt.subplots();
+# fig4,p2   = plt.subplots();
+# plot = [pd1,pd2,p1,p2]
+plot = [pd1,pd2]
+#figs = [fig1,fig2,fig3,fig4]
+figs = [fig1,fig2]
 for f,p in zip(figs,plot):
     p.set_ylim(0,1)
     # f.tight_layout()
@@ -324,8 +333,25 @@ X   = x[:, 1]
 R   = x[:, 2] # mutual inhibition with act-inhib signal
 R_P  = scaleValues(R_P,mult,add)   # Making a list of the corrected act-inhib in order to plot it
 
-S_lower, R_lower,S_upper, R_upper, R_tweak = getSteadyState2(S_inits, R)
-crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]]]        
+S_lower, R_lower,S_upper, R_upper, R_tweak,lowerFirst,upperLast = getSteadyState2(S_inits, R)
+crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]],lowerFirst]        
+# y=R_lower[-1]-lowerFirst[0]
+# x=S_lower[-1]-lowerFirst[1]
+# m_lower=y/x
+
+# y=R_upper[-1]-upperLast[0]
+# x=S_upper[-1]-upperLast[1]
+# m_upper=y/x
+
+# print(upperLast)
+# print([S_upper[0],R_upper[0]])
+# print(m_upper)
+
+lower_slope = 0.0998
+upper_slope = 0.5699
+
+# print(y)
+
 
 upperRange = [0.29,0.373]
 lowerRange = [0.127,0.168]
@@ -338,13 +364,14 @@ signalname = "$R_{AI}$"
 plots(pd1,"top",R_P,R,  start,signalname,crits)
 plots(pd2,"bot",t,  R,  start,"t",crits)
 # plots(pd2,"bot",t,  R_tweak,  start,"Time",crits)
-plots(p1, "top",R_P1,R1,start,signalname,crits)
-plots(p2, "bot",t,  R1, start,"t",crits)
+# plots(p1, "top",R_P1,R1,start,signalname,crits)
+# plots(p2, "bot",t,  R1, start,"t",crits)
 
 pd1.plot(S_lower,R_lower, color = "m")
 pd1.plot(S_upper,R_upper, color = "g")
-p1.plot(S_lower,R_lower, color = "m")
-p1.plot(S_upper,R_upper, color = "g")
+# pd1.plot(lowerFirst[0],lowerFirst[1], color = "c")
+# p1.plot(S_lower,R_lower, color = "m")
+# p1.plot(S_upper,R_upper, color = "g")
 
 # pd1.plot(upperLoopX,upperLoopY,"*", ms = 5, c = "m")
 # pd1.plot(lowerLoopX,lowerLoopY,"*", ms = 5, c = "m")
@@ -368,4 +395,4 @@ for f in figs:
     f.suptitle(title)
     #f.savefig(f"1f2b " + fignames[c] + ".png")
     c+=1
-plt.show()
+# plt.show()
