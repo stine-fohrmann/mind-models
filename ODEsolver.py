@@ -194,17 +194,22 @@ S_inits = np.linspace(0, 2, 1000)
 
 
 
-def removeItems(nparray, amount):
+def removeItems(nparray, amount, endpop = None, copy = False):
     if type(nparray) != list:
         lis = nparray.tolist()
     else:
         lis = nparray
+    if copy:
+        lis = lis.copy()
+    if endpop:
+        for element in range(len(lis)-endpop):
+           lis.pop(endpop)
     for element in range(amount):
         lis.pop(0)
     return lis
 
 
-def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
+def plots(axis,axisType,xval,yval,startVal,xlabel,crits, endVal = None):
     start = startVal
 
     # crit1R = 0.308; crit1S = 0.7; crit1col = "g"
@@ -245,7 +250,9 @@ def plots(axis,axisType,xval,yval,startVal,xlabel,crits):
 
 
 # ------------------- ACTUAL CODE ---------------------
-t = np.linspace(0,150,1000)
+ratioList = 2
+timeinterval = 400
+t = np.linspace(0,timeinterval,timeinterval*ratioList)
 
 
 # fig,ax   = plt.subplots(1,2, sharex = False, sharey=True, figsize=(12,4)); pd1 = ax[0]; pd2 = ax[1]
@@ -341,18 +348,6 @@ crits = [[S_lower[-1],R_lower[-1]],[S_upper[0],R_upper[0]],lowerFirst]
 lowerCrit = [S_lower[-1], R_lower[-1]]
 upperCrit = [S_upper[0], R_upper[0]]
 
-# y=R_lower[-1]-lowerFirst[0]
-# x=S_lower[-1]-lowerFirst[1]
-# m_lower=y/x
-
-# y=R_upper[-1]-upperLast[0]
-# x=S_upper[-1]-upperLast[1]
-# m_upper=y/x
-
-# print(upperLast)
-# print([S_upper[0],R_upper[0]])
-# print(m_upper)
-
 m_lower = 0.0998
 m_upper = 0.5699
 
@@ -363,6 +358,7 @@ print(b_upper)
 print(b_lower)
 
 distArray = []
+topbot_diff = 0.3
 
 for i in range(len(R_P)):
     R1=m_lower*R_P[i]+b_lower
@@ -371,11 +367,44 @@ for i in range(len(R_P)):
     R2_diff=R2-R[i]
     smallerOne = min(abs(R1_diff),abs(R2_diff))
     if abs(R1_diff) > abs(R2_diff):
-        smallerOne += 0.3
+        smallerOne += topbot_diff
     distArray.append(smallerOne)
 
-pd2.plot(t,distArray,"m")
+def colorArea(axes,x,y,popArea,ratioList, color = "b"):
+    # y_popped = removeItems(y,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+    if True:
+    # if len(x)>1:
+    #     x_popped = []
+    #     for i in x:
+    #         x_popped.append(removeItems(x,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True))
+    # else:
+        x_popped = removeItems(x,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
 
+    # if len(y)>1:
+    #     y_popped = []
+    #     for i in y:
+    #         y_popped.append(removeItems(y,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True))
+    # else:
+        y_popped = removeItems(y,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+
+    # if len([axes])>1:
+    #     count = 0
+    #     for ax in axes:
+    #         count+=1
+    #         ax.plot(x_popped[count],y_popped[count],color = color)
+    # else:
+        axes.plot(x_popped,y_popped,color = color)
+
+
+pd2.plot(t,distArray,"m")
+popArea = [45,63]
+# distArrayPop = removeItems(distArray,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+# t_popped     = removeItems(t,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+# pd2.plot(t_popped,distArrayPop,"y")
+
+# R_P_Pop = removeItems(R_P,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+# R_Pop = removeItems(R,popArea[0]*ratioList,endpop=popArea[1]*ratioList,copy = True)
+# pd1.plot(R_P_Pop,R_Pop,"y")
 # print(y)
 
 
@@ -383,7 +412,7 @@ upperRange = [0.29,0.373]
 lowerRange = [0.127,0.168]
 
 
-start = 370
+start = 0
 
 signalname = "$R_{AI}$"
 
@@ -392,6 +421,11 @@ plots(pd1,"top",R_P,R,  start,signalname,crits)
 # plots(pd2,"bot",t,  R_tweak,  start,"Time",crits)
 # plots(p1, "top",R_P1,R1,start,signalname,crits)
 # plots(p2, "bot",t,  R1, start,"t",crits)
+
+colorArea(pd2,t,distArray,popArea,ratioList)
+colorArea(pd1,R_P,R,popArea,ratioList)
+
+
 
 pd1.plot(S_lower,R_lower, color = "m")
 pd1.plot(S_upper,R_upper, color = "g")
